@@ -1,5 +1,5 @@
 /* Gray Mines service worker — cache the app shell for offline play. */
-const CACHE = "gray-mines-v1";
+const CACHE = "gray-mines-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -11,7 +11,14 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE).then((cache) =>
+      Promise.all(ASSETS.map((path) =>
+        fetch(new Request(path, { cache: "reload" })).then((res) => {
+          if (!res.ok) throw new Error("Failed to cache " + path);
+          return cache.put(path, res);
+        })
+      ))
+    ).then(() => self.skipWaiting())
   );
 });
 
@@ -25,6 +32,20 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put("./index.html", copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((hit) => {
       if (hit) return hit;

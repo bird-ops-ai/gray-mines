@@ -177,7 +177,7 @@ header {
   min-width: 0;
 }
 
-.diff, #flag-btn, #hint-dismiss, #overlay-btn {
+.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
@@ -399,10 +399,193 @@ header {
 .overlay.lose #overlay-title { color: var(--danger); }
 
 #overlay-sub {
-  margin: 8px 0 22px;
+  margin: 8px 0 4px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   font-size: 16px;
+}
+
+#overlay-stats {
+  margin: 0 0 18px;
+  min-height: 1.2em;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+#overlay-stats.muted {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+#stats-btn {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  padding: 7px 14px;
+  border-radius: 999px;
+}
+
+#stats-btn:active { transform: scale(0.98); }
+
+.stats-overlay {
+  z-index: 30;
+  padding:
+    calc(var(--safe-t) + 16px)
+    calc(var(--safe-r) + 12px)
+    calc(var(--safe-b) + 16px)
+    calc(var(--safe-l) + 12px);
+}
+
+.stats-card {
+  width: min(400px, 100%);
+  text-align: left;
+  padding: 16px 16px 14px;
+  max-height: min(86dvh, 720px);
+  overflow: auto;
+}
+
+.stats-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.stats-head h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+#stats-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.stats-segs {
+  width: 100%;
+  margin: 0 0 12px;
+}
+
+.stats-segs .diff {
+  flex: 1 1 0;
+  text-align: center;
+  padding: 7px 2px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+
+.stats-grid > div {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.stats-grid > div.span { grid-column: 1 / -1; }
+
+.stats-grid dt {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stats-grid dd {
+  margin: 3px 0 0;
+  font-size: 22px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.stats-note {
+  margin: 10px 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.stats-note[hidden] { display: none; }
+
+.stats-reset { margin-top: 14px; }
+
+#stats-reset {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  border-radius: 999px;
+  padding: 10px 14px;
+}
+
+#stats-confirm {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+#stats-confirm[hidden] { display: none; }
+
+#stats-confirm p {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.stats-confirm-row {
+  display: flex;
+  gap: 8px;
+}
+
+#stats-reset-cancel, #stats-reset-go {
+  flex: 1;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 12px;
+}
+
+#stats-reset-cancel {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+}
+
+#stats-reset-go {
+  border: 0;
+  background: var(--danger);
+  color: #1a140c;
 }
 
 #overlay-btn {
@@ -454,6 +637,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   <div class="app">
     <header>
       <h1 class="brand">Gray Mines</h1>
+      <button type="button" id="stats-btn">Stats</button>
     </header>
     <p id="ios-hint" hidden>
       <span>On your iPhone, tap the <strong>Share</strong> button, then <strong>Add to Home Screen</strong> for a full-screen, offline app. No ads.</span>
@@ -476,7 +660,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       </div>
     </div>
     <div class="row">
-      <div class="segs" role="group" aria-label="Difficulty">
+      <div class="segs" id="diff-segs" role="group" aria-label="Difficulty">
         <button type="button" class="diff" data-diff="easy" aria-pressed="false">Easy</button>
         <button type="button" class="diff" data-diff="medium" aria-pressed="false">Medium</button>
         <button type="button" class="diff" data-diff="hard" aria-pressed="false">Hard</button>
@@ -498,7 +682,34 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     <div class="card">
       <h2 id="overlay-title"></h2>
       <p id="overlay-sub"></p>
+      <p id="overlay-stats"></p>
       <button type="button" id="overlay-btn">Play again</button>
+    </div>
+  </div>
+  <div id="stats-overlay" class="overlay stats-overlay" hidden>
+    <div class="card stats-card" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+      <div class="stats-head">
+        <h2 id="stats-title">Stats</h2>
+        <button type="button" id="stats-close" aria-label="Close">×</button>
+      </div>
+      <div class="segs stats-segs" role="group" aria-label="Stats difficulty">
+        <button type="button" class="diff stats-tab" data-stats="all" aria-pressed="false">All</button>
+        <button type="button" class="diff stats-tab" data-stats="easy" aria-pressed="false">Easy</button>
+        <button type="button" class="diff stats-tab" data-stats="medium" aria-pressed="false">Medium</button>
+        <button type="button" class="diff stats-tab" data-stats="hard" aria-pressed="false">Hard</button>
+      </div>
+      <dl class="stats-grid" id="stats-grid"></dl>
+      <p id="stats-note" class="stats-note" hidden>Best times and the current streak stay with each difficulty. Longest is the highest of those streaks.</p>
+      <div class="stats-reset">
+        <button type="button" id="stats-reset">Reset stats</button>
+        <div id="stats-confirm" hidden>
+          <p>Clear every difficulty, including best times?</p>
+          <div class="stats-confirm-row">
+            <button type="button" id="stats-reset-cancel">Cancel</button>
+            <button type="button" id="stats-reset-go">Reset</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -795,40 +1006,219 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   }
 
   const STORAGE_KEY = "graymines-best";
+  const STATS_KEY = "graymines-stats";
+  const STAT_IDS = ["easy", "medium", "hard"];
 
-  function loadBests() {
+  function storageOf(storage) {
+    if (storage) return storage;
     try {
-      const raw = typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { easy: null, medium: null, hard: null };
-      const data = JSON.parse(raw);
-      return {
-        easy: typeof data.easy === "number" ? data.easy : null,
-        medium: typeof data.medium === "number" ? data.medium : null,
-        hard: typeof data.hard === "number" ? data.hard : null,
-      };
-    } catch (e) {
-      return { easy: null, medium: null, hard: null };
-    }
+      if (typeof localStorage !== "undefined" && localStorage) return localStorage;
+    } catch (e) { /* private mode */ }
+    return null;
   }
 
-  function saveBest(difficulty, seconds) {
-    const bests = loadBests();
-    const prev = bests[difficulty];
-    if (prev == null || seconds < prev) {
-      bests[difficulty] = seconds;
+  function blankBucket() {
+    return { played: 0, won: 0, best: null, winTimeSum: 0, streak: 0, bestStreak: 0 };
+  }
+
+  function emptyStats() {
+    return { easy: blankBucket(), medium: blankBucket(), hard: blankBucket() };
+  }
+
+  function nonnegInt(value) {
+    if (typeof value !== "number" || !isFinite(value) || value < 0) return 0;
+    return Math.floor(value);
+  }
+
+  function asSeconds(value) {
+    return nonnegInt(value);
+  }
+
+  function sanitizeBucket(raw) {
+    const bucket = blankBucket();
+    if (!raw || typeof raw !== "object") return bucket;
+    bucket.played = nonnegInt(raw.played);
+    bucket.won = Math.min(nonnegInt(raw.won), bucket.played);
+    bucket.best = (typeof raw.best === "number" && isFinite(raw.best) && raw.best >= 0)
+      ? Math.floor(raw.best)
+      : null;
+    bucket.winTimeSum = bucket.won ? nonnegInt(raw.winTimeSum) : 0;
+    bucket.streak = nonnegInt(raw.streak);
+    bucket.bestStreak = Math.max(nonnegInt(raw.bestStreak), bucket.streak);
+    return bucket;
+  }
+
+  function bestsOf(stats) {
+    return {
+      easy: stats.easy.best,
+      medium: stats.medium.best,
+      hard: stats.hard.best,
+    };
+  }
+
+  function readLegacyBests(store) {
+    const bests = { easy: null, medium: null, hard: null };
+    if (!store) return bests;
+    try {
+      const raw = store.getItem(STORAGE_KEY);
+      if (!raw) return bests;
+      const data = JSON.parse(raw);
+      for (let i = 0; i < STAT_IDS.length; i++) {
+        const id = STAT_IDS[i];
+        const value = data && data[id];
+        if (typeof value === "number" && isFinite(value) && value >= 0) bests[id] = Math.floor(value);
+      }
+    } catch (e) { /* ignore corrupt legacy */ }
+    return bests;
+  }
+
+  function writeAll(store, stats) {
+    if (!store) return;
+    try {
+      store.setItem(STATS_KEY, JSON.stringify(stats));
+      store.setItem(STORAGE_KEY, JSON.stringify(bestsOf(stats)));
+    } catch (e) { /* private mode */ }
+  }
+
+  function loadStats(storage) {
+    const store = storageOf(storage);
+    const stats = emptyStats();
+    let hadStats = false;
+    if (store) {
       try {
-        if (typeof localStorage !== "undefined") {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(bests));
+        const raw = store.getItem(STATS_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && typeof data === "object") {
+            for (let i = 0; i < STAT_IDS.length; i++) {
+              stats[STAT_IDS[i]] = sanitizeBucket(data[STAT_IDS[i]]);
+            }
+            hadStats = true;
+          }
         }
-      } catch (e) { /* private mode */ }
-      return { record: true, bests };
+      } catch (e) { /* corrupt stats; fall through to legacy bests */ }
     }
-    return { record: false, bests };
+    const legacy = readLegacyBests(store);
+    let changed = !hadStats;
+    for (let i = 0; i < STAT_IDS.length; i++) {
+      const id = STAT_IDS[i];
+      const previous = legacy[id];
+      if (previous == null) continue;
+      if (stats[id].best == null || previous < stats[id].best) {
+        stats[id].best = previous;
+        changed = true;
+      }
+    }
+    if (changed) writeAll(store, stats);
+    return stats;
+  }
+
+  function loadBests(storage) {
+    return bestsOf(loadStats(storage));
+  }
+
+  function saveBest(difficulty, seconds, storage) {
+    const stats = loadStats(storage);
+    const bests = bestsOf(stats);
+    if (!stats[difficulty]) return { record: false, bests: bests };
+    const secs = asSeconds(seconds);
+    const prev = stats[difficulty].best;
+    if (prev == null || secs < prev) {
+      stats[difficulty].best = secs;
+      writeAll(storageOf(storage), stats);
+      return { record: true, bests: bestsOf(stats) };
+    }
+    return { record: false, bests: bests };
+  }
+
+  function summarize(bucket) {
+    const played = bucket.played;
+    const won = bucket.won;
+    return {
+      played: played,
+      won: won,
+      winPct: played ? Math.round((won / played) * 100) : null,
+      best: bucket.best,
+      avgWin: won ? Math.round(bucket.winTimeSum / won) : null,
+      streak: bucket.streak,
+      bestStreak: bucket.bestStreak,
+    };
+  }
+
+  function summarizeAll(stats) {
+    let played = 0;
+    let won = 0;
+    let winTimeSum = 0;
+    let bestStreak = 0;
+    for (let i = 0; i < STAT_IDS.length; i++) {
+      const bucket = stats[STAT_IDS[i]];
+      played += bucket.played;
+      won += bucket.won;
+      winTimeSum += bucket.winTimeSum;
+      if (bucket.bestStreak > bestStreak) bestStreak = bucket.bestStreak;
+    }
+    return {
+      played: played,
+      won: won,
+      winPct: played ? Math.round((won / played) * 100) : null,
+      best: null,
+      avgWin: won ? Math.round(winTimeSum / won) : null,
+      streak: null,
+      bestStreak: bestStreak,
+    };
+  }
+
+  // A board counts only after the first reveal. Leaving a ready board
+  // (including one that was only flagged) is not a game. Leaving mid-play
+  // is a loss. Finished games are already recorded.
+  function leaveOutcome(state) {
+    if (!state || state.status !== "playing") return null;
+    return { won: false, seconds: elapsedSeconds(state) };
+  }
+
+  function recordResult(storage, difficulty, outcome) {
+    if (!DIFFICULTY[difficulty]) throw new Error("Unknown difficulty");
+    const stats = loadStats(storage);
+    const bucket = stats[difficulty];
+    const won = !!(outcome && outcome.won);
+    const seconds = asSeconds(outcome && outcome.seconds);
+    const previousStreak = bucket.streak;
+    bucket.played += 1;
+    let record = false;
+    if (won) {
+      bucket.won += 1;
+      bucket.winTimeSum += seconds;
+      bucket.streak += 1;
+      if (bucket.streak > bucket.bestStreak) bucket.bestStreak = bucket.streak;
+      if (bucket.best == null || seconds < bucket.best) {
+        bucket.best = seconds;
+        record = true;
+      }
+    } else {
+      bucket.streak = 0;
+    }
+    writeAll(storageOf(storage), stats);
+    return {
+      record: record,
+      streak: bucket.streak,
+      bestStreak: bucket.bestStreak,
+      previousStreak: previousStreak,
+      endedStreak: !won && previousStreak > 0,
+      summary: summarize(bucket),
+      stats: stats,
+    };
+  }
+
+  function resetStats(storage) {
+    const stats = emptyStats();
+    writeAll(storageOf(storage), stats);
+    return stats;
   }
 
   return {
     DIFFICULTY,
     STORAGE_KEY,
+    STATS_KEY,
     createGame,
     placeMines,
     computeAdjacents,
@@ -843,6 +1233,12 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     countMines,
     loadBests,
     saveBest,
+    loadStats,
+    recordResult,
+    resetStats,
+    summarize,
+    summarizeAll,
+    leaveOutcome,
   };
 });
 
@@ -864,15 +1260,26 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   const overlay = $("#overlay");
   const overlayTitle = $("#overlay-title");
   const overlaySub = $("#overlay-sub");
+  const overlayStats = $("#overlay-stats");
   const overlayBtn = $("#overlay-btn");
   const hintEl = $("#ios-hint");
   const hintDismiss = $("#hint-dismiss");
+  const statsBtn = $("#stats-btn");
+  const statsOverlay = $("#stats-overlay");
+  const statsClose = $("#stats-close");
+  const statsGrid = $("#stats-grid");
+  const statsNote = $("#stats-note");
+  const statsReset = $("#stats-reset");
+  const statsConfirm = $("#stats-confirm");
+  const statsResetCancel = $("#stats-reset-cancel");
+  const statsResetGo = $("#stats-reset-go");
 
   let game = null;
   let difficulty = "easy";
   let flagMode = false;
   let timerId = null;
   let cells = []; // [r][c] -> button
+  let statsView = "easy";
 
   function formatTime(s) {
     s = Math.max(0, s | 0);
@@ -969,23 +1376,45 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     updateHUD();
   }
 
+  function finishSummary(result, won) {
+    if (won) {
+      return result.record
+        ? "New best!  ·  Streak " + result.streak
+        : "Streak " + result.streak;
+    }
+    return result.endedStreak ? "Streak ended" : "Streak 0";
+  }
+
+  function recordFinish() {
+    if (game.statsResult) return game.statsResult;
+    const won = game.status === "won";
+    const result = G.recordResult(null, difficulty, {
+      won: won,
+      seconds: G.elapsedSeconds(game),
+    });
+    game.statsRecorded = true;
+    game.statsResult = result;
+    return result;
+  }
+
   function showEnd() {
     stopTimer();
     updateHUD();
     paintAll();
+    const won = game.status === "won";
+    const result = recordFinish();
     overlay.hidden = false;
-    if (game.status === "won") {
-      const t = G.elapsedSeconds(game);
-      const saved = G.saveBest(difficulty, t);
+    overlaySub.textContent = formatTime(G.elapsedSeconds(game));
+    overlayStats.textContent = finishSummary(result, won);
+    overlayStats.classList.toggle("muted", !won);
+    if (won) {
       overlayTitle.textContent = "Clear";
-      overlaySub.textContent = formatTime(t) + (saved.record ? "  ·  new best" : "");
       overlayBtn.textContent = "Play again";
       overlay.classList.add("win");
       overlay.classList.remove("lose");
       updateBestLabel();
     } else {
       overlayTitle.textContent = "Mine tripped";
-      overlaySub.textContent = formatTime(G.elapsedSeconds(game));
       overlayBtn.textContent = "Try again";
       overlay.classList.add("lose");
       overlay.classList.remove("win");
@@ -1121,14 +1550,23 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     boardEl.appendChild(frag);
   }
 
+  function settleOpenGame() {
+    if (!game || game.statsRecorded) return;
+    const outcome = G.leaveOutcome(game);
+    if (!outcome) return;
+    G.recordResult(null, difficulty, outcome);
+    game.statsRecorded = true;
+  }
+
   function newGame(diff) {
+    settleOpenGame();
     if (diff) difficulty = diff;
     saveDifficulty(difficulty);
     stopTimer();
     overlay.hidden = true;
     overlay.classList.remove("win", "lose");
     game = G.createGame(difficulty);
-    document.querySelectorAll(".diff").forEach((b) => {
+    document.querySelectorAll("#diff-segs .diff").forEach((b) => {
       b.classList.toggle("on", b.dataset.diff === difficulty);
       b.setAttribute("aria-pressed", b.dataset.diff === difficulty ? "true" : "false");
     });
@@ -1147,15 +1585,98 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     document.body.classList.toggle("flag-mode", on);
   }
 
+  function dash(value) {
+    return value == null ? "—" : String(value);
+  }
+
+  function hideStatsConfirm() {
+    statsConfirm.hidden = true;
+    statsReset.hidden = false;
+  }
+
+  function renderStats() {
+    document.querySelectorAll(".stats-tab").forEach((b) => {
+      const on = b.dataset.stats === statsView;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    const stats = G.loadStats();
+    const summary = statsView === "all" ? G.summarizeAll(stats) : G.summarize(stats[statsView]);
+    const rows = [
+      ["Played", String(summary.played)],
+      ["Won", String(summary.won)],
+      ["Win %", summary.winPct == null ? "—" : summary.winPct + "%"],
+      ["Best", summary.best == null ? "—" : formatTime(summary.best)],
+      ["Avg win", summary.avgWin == null ? "—" : formatTime(summary.avgWin)],
+      ["Streak", dash(summary.streak)],
+      ["Longest", String(summary.bestStreak)],
+    ];
+    statsGrid.innerHTML = "";
+    for (let i = 0; i < rows.length; i++) {
+      const wrap = document.createElement("div");
+      if (i === rows.length - 1) wrap.className = "span";
+      const dt = document.createElement("dt");
+      dt.textContent = rows[i][0];
+      const dd = document.createElement("dd");
+      dd.textContent = rows[i][1];
+      wrap.appendChild(dt);
+      wrap.appendChild(dd);
+      statsGrid.appendChild(wrap);
+    }
+    statsNote.hidden = statsView !== "all";
+  }
+
+  function openStats() {
+    statsView = difficulty;
+    hideStatsConfirm();
+    renderStats();
+    statsOverlay.hidden = false;
+    statsClose.focus();
+  }
+
+  function closeStats() {
+    statsOverlay.hidden = true;
+    hideStatsConfirm();
+    statsBtn.focus();
+  }
+
   flagBtn.addEventListener("click", () => setFlagMode(!flagMode));
   restartEl.addEventListener("click", () => newGame());
   overlayBtn.addEventListener("click", () => newGame());
+  statsBtn.addEventListener("click", openStats);
+  statsClose.addEventListener("click", closeStats);
+  statsOverlay.addEventListener("click", (e) => {
+    if (e.target === statsOverlay) closeStats();
+  });
+  document.querySelectorAll(".stats-tab").forEach((b) => {
+    b.addEventListener("click", () => {
+      statsView = b.dataset.stats;
+      hideStatsConfirm();
+      renderStats();
+    });
+  });
+  statsReset.addEventListener("click", () => {
+    statsReset.hidden = true;
+    statsConfirm.hidden = false;
+    statsResetGo.focus();
+  });
+  statsResetCancel.addEventListener("click", hideStatsConfirm);
+  statsResetGo.addEventListener("click", () => {
+    G.resetStats();
+    hideStatsConfirm();
+    updateBestLabel();
+    renderStats();
+  });
 
-  document.querySelectorAll(".diff").forEach((b) => {
+  document.querySelectorAll("#diff-segs .diff").forEach((b) => {
     b.addEventListener("click", () => newGame(b.dataset.diff));
   });
 
   document.addEventListener("keydown", (e) => {
+    if (!statsOverlay.hidden) {
+      if (e.key === "Escape") closeStats();
+      return;
+    }
     if (e.key === "f" || e.key === "F") {
       setFlagMode(!flagMode);
     } else if (e.key === "r" || e.key === "R") {
@@ -1181,7 +1702,9 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   });
 
   if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
-    navigator.serviceWorker.register("./sw.js").catch(() => { /* offline file or missing sw */ });
+    navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).then((reg) => {
+      reg.update().catch(() => { /* offline */ });
+    }).catch(() => { /* offline file or missing sw */ });
   }
 
   difficulty = loadDifficulty();
