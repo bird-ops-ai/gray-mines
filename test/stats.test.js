@@ -53,13 +53,32 @@ function test(name, fn) {
   }
 }
 
-test("page exposes a Stats button and the worker cache moved to v2", () => {
+test("page exposes a Stats button and the worker cache moved to v3", () => {
   assert.ok(html.includes('id="stats-btn"'));
   assert.ok(html.includes(">Stats<"));
-  assert.ok(sw.includes('const CACHE = "gray-mines-v2"'));
+  assert.ok(sw.includes('const CACHE = "gray-mines-v3"'));
   assert.ok(sw.includes("skipWaiting"));
   assert.ok(sw.includes("clients.claim"));
   assert.ok(html.includes('updateViaCache: "none"'));
+});
+
+test("flag haptics use the iOS switch click and can be turned off", () => {
+  assert.ok(html.includes('type="checkbox" switch'));
+  assert.ok(html.includes('id="haptic-label"'));
+  assert.ok(html.includes('id="haptic-toggle"'));
+  assert.ok(html.includes("graymines-haptics"));
+  assert.ok(html.includes("navigator.vibrate(15)"));
+  assert.ok(html.includes("prefers-reduced-motion"));
+  assert.ok(html.includes("flag-pop"));
+  assert.ok(html.includes("hapticDue"));
+  // Long-press draws the flag in the timer, then haptics run on pointerup.
+  const ui = html.slice(html.indexOf("function onFlag"));
+  const timerAt = ui.indexOf("onFlag(r, c, false)");
+  const upAt = ui.indexOf("if (owed)");
+  assert.ok(timerAt !== -1 && upAt !== -1 && timerAt < upAt);
+  assert.ok(ui.includes("clickHapticSwitch()"));
+  assert.ok(ui.slice(upAt, upAt + 180).includes("buzz()"));
+  assert.ok(ui.slice(upAt, upAt + 180).includes("clickHapticSwitch()"));
 });
 
 test("migrates legacy best times without inventing games", () => {

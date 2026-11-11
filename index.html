@@ -177,7 +177,7 @@ header {
   min-width: 0;
 }
 
-.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go {
+.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
@@ -308,6 +308,13 @@ header {
 
 .cell.flagged { color: var(--accent); }
 
+.cell.flash { animation: cell-flash 280ms ease; }
+
+@keyframes cell-flash {
+  0% { filter: brightness(1.55); }
+  100% { filter: brightness(1); }
+}
+
 .flag {
   width: 0.22em;
   height: 0.95em;
@@ -316,6 +323,22 @@ header {
   position: relative;
   display: block;
   margin-left: -0.15em;
+}
+
+.flag.pop {
+  transform-origin: 30% 70%;
+  animation: flag-pop 220ms ease;
+}
+
+@keyframes flag-pop {
+  0% { transform: scale(0.35); }
+  55% { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.flash,
+  .flag.pop { animation: none; }
 }
 
 .flag::after {
@@ -534,7 +557,52 @@ header {
 
 .stats-note[hidden] { display: none; }
 
-.stats-reset { margin-top: 14px; }
+.haptic-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.haptic-row span {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+#haptic-toggle {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 7px 16px;
+  min-width: 64px;
+}
+
+#haptic-toggle.on {
+  background: var(--accent);
+  color: #1a140c;
+  border-color: transparent;
+}
+
+/* Present for hit-testing the iOS switch haptic, but out of layout and AT. */
+#haptic-sink {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  clip-path: inset(50%);
+}
+
+.stats-reset { margin-top: 12px; }
 
 #stats-reset {
   width: 100%;
@@ -700,6 +768,10 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       </div>
       <dl class="stats-grid" id="stats-grid"></dl>
       <p id="stats-note" class="stats-note" hidden>Best times and the current streak stay with each difficulty. Longest is the highest of those streaks.</p>
+      <div class="haptic-row">
+        <span id="haptic-caption">Haptics</span>
+        <button type="button" id="haptic-toggle" aria-pressed="true" aria-labelledby="haptic-caption">On</button>
+      </div>
       <div class="stats-reset">
         <button type="button" id="stats-reset">Reset stats</button>
         <div id="stats-confirm" hidden>
@@ -711,6 +783,10 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         </div>
       </div>
     </div>
+  </div>
+  <div id="haptic-sink" aria-hidden="true">
+    <input type="checkbox" switch id="haptic-switch" tabindex="-1" aria-hidden="true">
+    <label for="haptic-switch" id="haptic-label"></label>
   </div>
   <script>
 /**
@@ -1273,6 +1349,9 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   const statsConfirm = $("#stats-confirm");
   const statsResetCancel = $("#stats-reset-cancel");
   const statsResetGo = $("#stats-reset-go");
+  const hapticToggle = $("#haptic-toggle");
+  const hapticLabel = $("#haptic-label");
+  const HAPTIC_KEY = "graymines-haptics";
 
   let game = null;
   let difficulty = "easy";
@@ -1333,7 +1412,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     }
   }
 
-  function paintCell(r, c) {
+  function paintCell(r, c, fx) {
     const el = cells[r][c];
     const cell = game.board[r][c];
     el.className = "cell";
@@ -1348,24 +1427,26 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         el.classList.add("wrong");
         el.setAttribute("aria-label", "wrong flag");
       }
-      return;
-    }
-    if (!cell.revealed) {
-      return;
-    }
-    el.classList.add("open");
-    if (cell.mine) {
-      el.classList.add(cell.exploded ? "boom" : "mine");
-      el.innerHTML = '<span class="ore" aria-hidden="true"></span>';
-      el.setAttribute("aria-label", "mine");
-      return;
-    }
-    if (cell.adjacent > 0) {
-      el.dataset.n = String(cell.adjacent);
-      el.textContent = String(cell.adjacent);
-      el.setAttribute("aria-label", cell.adjacent + " nearby");
+    } else if (!cell.revealed) {
+      /* still covered */
     } else {
-      el.setAttribute("aria-label", "empty");
+      el.classList.add("open");
+      if (cell.mine) {
+        el.classList.add(cell.exploded ? "boom" : "mine");
+        el.innerHTML = '<span class="ore" aria-hidden="true"></span>';
+        el.setAttribute("aria-label", "mine");
+      } else if (cell.adjacent > 0) {
+        el.dataset.n = String(cell.adjacent);
+        el.textContent = String(cell.adjacent);
+        el.setAttribute("aria-label", cell.adjacent + " nearby");
+      } else {
+        el.setAttribute("aria-label", "empty");
+      }
+    }
+    if (fx && fx.flash) el.classList.add("flash");
+    if (fx && fx.pop) {
+      const flag = el.querySelector(".flag");
+      if (flag) flag.classList.add("pop");
     }
   }
 
@@ -1450,20 +1531,58 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     applyResult(G.reveal(game, r, c));
   }
 
-  function onFlag(r, c) {
+  function hapticsOn() {
+    try { return localStorage.getItem(HAPTIC_KEY) !== "0"; }
+    catch (e) { return true; }
+  }
+
+  function syncHapticToggle() {
+    const on = hapticsOn();
+    hapticToggle.classList.toggle("on", on);
+    hapticToggle.setAttribute("aria-pressed", on ? "true" : "false");
+    hapticToggle.textContent = on ? "On" : "Off";
+  }
+
+  function setHapticsOn(on) {
+    try { localStorage.setItem(HAPTIC_KEY, on ? "1" : "0"); }
+    catch (e) { /* private mode */ }
+    syncHapticToggle();
+  }
+
+  function buzz() {
+    if (!hapticsOn()) return;
+    try {
+      if (navigator.vibrate) navigator.vibrate(15);
+    } catch (e) { /* unsupported */ }
+  }
+
+  // iOS Safari has no navigator.vibrate. iOS 18 plays the system switch
+  // haptic when a label for <input type="checkbox" switch> is clicked, and
+  // only during a user gesture. navigator.vibrate has the same limit.
+  // A long-press timer is not a gesture: the flag is drawn there, and both
+  // the switch click and vibrate(15) run on the following pointerup
+  // (touchend). Taps in flag mode and right-click run them in that event.
+  function clickHapticSwitch() {
+    if (!hapticsOn() || !hapticLabel) return;
+    hapticLabel.click();
+  }
+
+  function onFlag(r, c, gesture) {
     const res = G.toggleFlag(game, r, c);
-    if (res.ok) {
-      paintCell(r, c);
-      updateHUD();
-      try {
-        if (navigator.vibrate) navigator.vibrate(15);
-      } catch (e) { /* unsupported */ }
+    if (!res.ok) return false;
+    paintCell(r, c, { pop: !!res.flagged, flash: true });
+    updateHUD();
+    if (gesture) {
+      buzz();
+      clickHapticSwitch();
     }
+    return true;
   }
 
   function bindCell(btn, r, c) {
     let timer = null;
     let longFired = false;
+    let hapticDue = false;
     let sx = 0, sy = 0;
     let pointerId = null;
 
@@ -1478,6 +1597,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       if (e.button != null && e.button !== 0) return;
       pointerId = e.pointerId;
       longFired = false;
+      hapticDue = false;
       sx = e.clientX;
       sy = e.clientY;
       try { btn.setPointerCapture(e.pointerId); } catch (err) { /* old safari */ }
@@ -1485,7 +1605,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       timer = setTimeout(() => {
         timer = null;
         longFired = true;
-        if (!flagMode) onFlag(r, c);
+        if (!flagMode && onFlag(r, c, false)) hapticDue = true;
       }, LONG_MS);
     });
 
@@ -1498,11 +1618,21 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     function endPress(e) {
       if (pointerId == null) return;
       const wasLong = longFired;
+      const owed = hapticDue;
       const hadTimer = !!timer;
       clear();
       pointerId = null;
+      hapticDue = false;
       if (e && e.type === "pointercancel") return;
-      if (wasLong) return; // already flagged
+      if (wasLong) {
+        // Timer already drew the flag. pointerup is still the touch gesture,
+        // so the iOS switch click and Android vibrate can run here.
+        if (owed) {
+          buzz();
+          clickHapticSwitch();
+        }
+        return;
+      }
       if (!hadTimer && !wasLong) {
         // cancelled by move
       }
@@ -1511,7 +1641,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         const dx = e.clientX - sx, dy = e.clientY - sy;
         if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) return;
       }
-      if (flagMode) onFlag(r, c);
+      if (flagMode) onFlag(r, c, true);
       else onReveal(r, c);
     }
 
@@ -1519,11 +1649,13 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     btn.addEventListener("pointercancel", () => {
       clear();
       pointerId = null;
+      hapticDue = false;
     });
 
     btn.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      onFlag(r, c);
+      if (longFired) return; // long-press already placed the flag
+      onFlag(r, c, true);
     });
   }
 
@@ -1630,6 +1762,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     statsView = difficulty;
     hideStatsConfirm();
     renderStats();
+    syncHapticToggle();
     statsOverlay.hidden = false;
     statsClose.focus();
   }
@@ -1667,6 +1800,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     updateBestLabel();
     renderStats();
   });
+  hapticToggle.addEventListener("click", () => setHapticsOn(!hapticsOn()));
 
   document.querySelectorAll("#diff-segs .diff").forEach((b) => {
     b.addEventListener("click", () => newGame(b.dataset.diff));
@@ -1707,6 +1841,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     }).catch(() => { /* offline file or missing sw */ });
   }
 
+  syncHapticToggle();
   difficulty = loadDifficulty();
   newGame(difficulty);
 })();
