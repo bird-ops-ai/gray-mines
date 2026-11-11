@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14110e">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gray Mines">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="Gray Mines is an original, ad-free mine-hunting puzzle.">
+  <title>Gray Mines</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/png;base64,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">
+  <link rel="icon" type="image/png" href="data:image/png;base64,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">
+  <style>
+:root {
+  --bg: #14110e;
+  --bg-elev: #1c1814;
+  --line: rgba(243, 234, 216, 0.08);
+  --text: #f3ead8;
+  --muted: #9a8c78;
+  --accent: #e0a45a;
+  --accent-dim: #b8864a;
+  --cell: #2c261f;
+  --cell-hi: #3a3229;
+  --cell-open: #1a1713;
+  --danger: #e07a5f;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --pad: 14px;
+  --n1: #7eb8d4;
+  --n2: #8fbf7a;
+  --n3: #e07a5f;
+  --n4: #c9a0dc;
+  --n5: #e0a45a;
+  --n6: #6ec9c0;
+  --n7: #d4c4a8;
+  --n8: #8a7c6c;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-rounded, "SF Pro Rounded", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+body {
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  padding:
+    calc(var(--safe-t) + 8px)
+    calc(var(--safe-r) + var(--pad))
+    calc(var(--safe-b) + 10px)
+    calc(var(--safe-l) + var(--pad));
+}
+
+.app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 10px;
+}
+
+.brand {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stat:last-of-type { align-items: flex-end; text-align: right; }
+
+.stat-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 620;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.stat-value.warn { color: var(--danger); }
+
+#restart {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 164, 90, 0.35);
+  background: radial-gradient(circle at 50% 30%, #2a241e, #1a1713);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+#restart svg { width: 22px; height: 22px; display: block; }
+
+#restart.spin svg { animation: spin 0.45s ease; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+#restart:active { transform: scale(0.96); }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0 8px;
+}
+
+.segs {
+  display: flex;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+  min-width: 0;
+}
+
+.diff, #flag-btn, #hint-dismiss, #overlay-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.diff {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 999px;
+}
+
+.diff.on {
+  background: var(--accent);
+  color: #1a140c;
+}
+
+#flag-btn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+}
+
+#flag-btn.on {
+  background: var(--accent);
+  color: #1a140c;
+  border-color: transparent;
+}
+
+#flag-btn .mini-flag {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+#best {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  padding: 0 2px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  justify-content: safe center;
+  align-items: safe center;
+  padding-bottom: 8px;
+  touch-action: pan-x pan-y;
+}
+
+#board {
+  --cols: 9;
+  --rows: 9;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 3px;
+  width: min(100%, calc(var(--cols) * 44px));
+  min-width: min(100%, calc(var(--cols) * 28px));
+  touch-action: manipulation;
+}
+
+.cell {
+  aspect-ratio: 1;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 7px;
+  background: linear-gradient(180deg, var(--cell-hi) 0%, var(--cell) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font: inherit;
+  font-weight: 730;
+  font-size: clamp(13px, 4.6vw, 18px);
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  position: relative;
+}
+
+#board[data-difficulty="medium"] .cell,
+#board[data-difficulty="hard"] .cell {
+  border-radius: 5px;
+  font-size: clamp(11px, 3.4vw, 16px);
+}
+
+.cell:active:not(.open) {
+  filter: brightness(1.12);
+}
+
+.cell.open {
+  background: var(--cell-open);
+  box-shadow: none;
+  cursor: default;
+}
+
+.cell.open[data-n="1"] { color: var(--n1); }
+.cell.open[data-n="2"] { color: var(--n2); }
+.cell.open[data-n="3"] { color: var(--n3); }
+.cell.open[data-n="4"] { color: var(--n4); }
+.cell.open[data-n="5"] { color: var(--n5); }
+.cell.open[data-n="6"] { color: var(--n6); }
+.cell.open[data-n="7"] { color: var(--n7); }
+.cell.open[data-n="8"] { color: var(--n8); }
+
+.cell.flagged { color: var(--accent); }
+
+.flag {
+  width: 0.22em;
+  height: 0.95em;
+  border-radius: 1px;
+  background: #f3ead8;
+  position: relative;
+  display: block;
+  margin-left: -0.15em;
+}
+
+.flag::after {
+  content: "";
+  position: absolute;
+  left: 0.22em;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0.28em 0 0.28em 0.55em;
+  border-color: transparent transparent transparent var(--accent);
+}
+
+.cell.wrong::before {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-top: 2px solid var(--danger);
+  transform: rotate(45deg);
+  transform-origin: center;
+  pointer-events: none;
+}
+.cell.wrong::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-top: 2px solid var(--danger);
+  transform: rotate(-45deg);
+  pointer-events: none;
+}
+
+.ore {
+  width: 0.52em;
+  height: 0.52em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f3d7a0, #c47a3a 55%, #3a2a1c 100%);
+  box-shadow: 0 0 0 2px #2a2018, 0 0 10px rgba(224, 164, 90, 0.4);
+  display: block;
+}
+
+.cell.boom {
+  background: #4a2218;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.cell.mine.open { background: #241c16; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 10, 8, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 20;
+}
+
+.overlay[hidden] { display: none; }
+
+.card {
+  width: min(320px, 100%);
+  background: #221c17;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px 22px 22px;
+  text-align: center;
+}
+
+#overlay-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.overlay.win #overlay-title { color: var(--accent); }
+.overlay.lose #overlay-title { color: var(--danger); }
+
+#overlay-sub {
+  margin: 8px 0 22px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+}
+
+#overlay-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #1a140c;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 13px 16px;
+}
+
+#overlay-btn:active { transform: scale(0.98); }
+
+#ios-hint {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+#ios-hint[hidden] { display: none; }
+
+#ios-hint strong { color: var(--text); font-weight: 650; }
+
+#hint-dismiss {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  margin-left: auto;
+}
+
+body.flag-mode .cell:not(.open) { cursor: cell; }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1 class="brand">Gray Mines</h1>
+    </header>
+    <p id="ios-hint" hidden>
+      <span>On your iPhone, tap the <strong>Share</strong> button, then <strong>Add to Home Screen</strong> for a full-screen, offline app. No ads.</span>
+      <button type="button" id="hint-dismiss" aria-label="Dismiss">×</button>
+    </p>
+    <div class="toolbar">
+      <div class="stat">
+        <span class="stat-label">Left</span>
+        <span class="stat-value" id="mines">10</span>
+      </div>
+      <button type="button" id="restart" aria-label="New game">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 12a8 8 0 1 1-2.2-5.5"/>
+          <path d="M20 4v5h-5"/>
+        </svg>
+      </button>
+      <div class="stat">
+        <span class="stat-label">Time</span>
+        <span class="stat-value" id="timer">0:00</span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="segs" role="group" aria-label="Difficulty">
+        <button type="button" class="diff" data-diff="easy" aria-pressed="false">Easy</button>
+        <button type="button" class="diff" data-diff="medium" aria-pressed="false">Medium</button>
+        <button type="button" class="diff" data-diff="hard" aria-pressed="false">Hard</button>
+      </div>
+      <button type="button" id="flag-btn" aria-pressed="false" aria-label="Flag mode">
+        <svg class="mini-flag" viewBox="0 0 16 16" aria-hidden="true">
+          <line x1="3.5" y1="1.2" x2="3.5" y2="14.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <polygon points="4.5,1.4 14,4.8 4.5,8.2" fill="currentColor"/>
+        </svg>
+        Flag
+      </button>
+    </div>
+    <div id="best">Best —</div>
+    <div class="board-wrap">
+      <div id="board" role="grid" aria-label="Game board"></div>
+    </div>
+  </div>
+  <div id="overlay" class="overlay" hidden>
+    <div class="card">
+      <h2 id="overlay-title"></h2>
+      <p id="overlay-sub"></p>
+      <button type="button" id="overlay-btn">Play again</button>
+    </div>
+  </div>
+  <script>
+/**
+ * Gray Mines — core rules (browser + Node).
+ * Original implementation; standard grid / number gameplay only.
+ */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.GrayMines = factory();
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+
+  const DIFFICULTY = {
+    easy: { id: "easy", label: "Easy", rows: 9, cols: 9, mines: 10 },
+    medium: { id: "medium", label: "Medium", rows: 16, cols: 16, mines: 40 },
+    hard: { id: "hard", label: "Hard", rows: 30, cols: 16, mines: 99 },
+  };
+
+  function inBounds(state, r, c) {
+    return r >= 0 && c >= 0 && r < state.rows && c < state.cols;
+  }
+
+  function neighbors(state, r, c) {
+    const out = [];
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr, nc = c + dc;
+        if (inBounds(state, nr, nc)) out.push([nr, nc]);
+      }
+    }
+    return out;
+  }
+
+  function defaultRng() {
+    return Math.random();
+  }
+
+  function makeBoard(rows, cols) {
+    const board = [];
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        row.push({ mine: false, revealed: false, flagged: false, adjacent: 0 });
+      }
+      board.push(row);
+    }
+    return board;
+  }
+
+  function createGame(difficulty, opts) {
+    const diff = typeof difficulty === "string" ? DIFFICULTY[difficulty] : difficulty;
+    if (!diff) throw new Error("Unknown difficulty");
+    const options = opts || {};
+    return {
+      difficulty: diff.id || "custom",
+      rows: diff.rows,
+      cols: diff.cols,
+      mines: diff.mines,
+      board: makeBoard(diff.rows, diff.cols),
+      mined: false,
+      status: "ready", // ready | playing | won | lost
+      flagCount: 0,
+      revealedCount: 0,
+      startedAt: null,
+      endedAt: null,
+      rng: options.rng || defaultRng,
+      _preplaced: options.mines || null,
+    };
+  }
+
+  function safeCellsAround(state, r, c, includeSelf) {
+    const cells = [];
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (!includeSelf && dr === 0 && dc === 0) continue;
+        const nr = r + dr, nc = c + dc;
+        if (inBounds(state, nr, nc)) cells.push(nr + "," + nc);
+      }
+    }
+    return new Set(cells);
+  }
+
+  function computeAdjacents(state) {
+    for (let r = 0; r < state.rows; r++) {
+      for (let c = 0; c < state.cols; c++) {
+        if (state.board[r][c].mine) {
+          state.board[r][c].adjacent = 0;
+          continue;
+        }
+        let n = 0;
+        const neigh = neighbors(state, r, c);
+        for (let i = 0; i < neigh.length; i++) {
+          const cell = state.board[neigh[i][0]][neigh[i][1]];
+          if (cell.mine) n++;
+        }
+        state.board[r][c].adjacent = n;
+      }
+    }
+  }
+
+  function placeMines(state, safeRow, safeCol) {
+    if (state.mined) return;
+    const total = state.rows * state.cols;
+    if (state.mines >= total) throw new Error("Too many mines");
+
+    if (state._preplaced) {
+      for (let i = 0; i < state._preplaced.length; i++) {
+        const [r, c] = state._preplaced[i];
+        if (!inBounds(state, r, c)) throw new Error("Mine out of bounds");
+        state.board[r][c].mine = true;
+      }
+      state.mined = true;
+      computeAdjacents(state);
+      return;
+    }
+
+    // Prefer a fully clear 3x3 around the first tap so it opens an empty area.
+    let forbidden = safeCellsAround(state, safeRow, safeCol, true);
+    const available = total - forbidden.size;
+    if (available < state.mines) {
+      forbidden = new Set([safeRow + "," + safeCol]);
+    }
+
+    const slots = [];
+    for (let r = 0; r < state.rows; r++) {
+      for (let c = 0; c < state.cols; c++) {
+        if (!forbidden.has(r + "," + c)) slots.push([r, c]);
+      }
+    }
+
+    // Fisher–Yates partial shuffle
+    const rng = state.rng;
+    for (let i = slots.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      const tmp = slots[i];
+      slots[i] = slots[j];
+      slots[j] = tmp;
+    }
+    for (let i = 0; i < state.mines; i++) {
+      const [r, c] = slots[i];
+      state.board[r][c].mine = true;
+    }
+    state.mined = true;
+    computeAdjacents(state);
+  }
+
+  function minesRemaining(state) {
+    return state.mines - state.flagCount;
+  }
+
+  function checkWin(state) {
+    const need = state.rows * state.cols - state.mines;
+    return state.revealedCount >= need && state.status !== "lost";
+  }
+
+  function finish(state, status) {
+    state.status = status;
+    state.endedAt = Date.now();
+    if (status === "lost") {
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          const cell = state.board[r][c];
+          if (cell.mine) cell.revealed = true;
+        }
+      }
+    } else if (status === "won") {
+      for (let r = 0; r < state.rows; r++) {
+        for (let c = 0; c < state.cols; c++) {
+          const cell = state.board[r][c];
+          if (cell.mine && !cell.flagged) {
+            cell.flagged = true;
+            state.flagCount++;
+          }
+        }
+      }
+    }
+  }
+
+  function floodReveal(state, startR, startC) {
+    const stack = [[startR, startC]];
+    const newly = [];
+    while (stack.length) {
+      const [r, c] = stack.pop();
+      if (!inBounds(state, r, c)) continue;
+      const cell = state.board[r][c];
+      if (cell.revealed || cell.flagged || cell.mine) continue;
+      cell.revealed = true;
+      state.revealedCount++;
+      newly.push([r, c]);
+      if (cell.adjacent === 0) {
+        const neigh = neighbors(state, r, c);
+        for (let i = 0; i < neigh.length; i++) stack.push(neigh[i]);
+      }
+    }
+    return newly;
+  }
+
+  function reveal(state, r, c) {
+    if (state.status === "won" || state.status === "lost") {
+      return { ok: false, reason: "ended" };
+    }
+    if (!inBounds(state, r, c)) return { ok: false, reason: "oob" };
+    const cell = state.board[r][c];
+    if (cell.revealed) return { ok: false, reason: "revealed" };
+    if (cell.flagged) return { ok: false, reason: "flagged" };
+
+    if (!state.mined) {
+      placeMines(state, r, c);
+    }
+    if (state.status === "ready") {
+      state.status = "playing";
+      state.startedAt = Date.now();
+    }
+
+    if (cell.mine) {
+      cell.revealed = true;
+      cell.exploded = true;
+      finish(state, "lost");
+      return { ok: true, hitMine: true, opened: [[r, c]] };
+    }
+
+    const opened = floodReveal(state, r, c);
+    if (checkWin(state)) finish(state, "won");
+    return { ok: true, hitMine: false, opened, status: state.status };
+  }
+
+  function toggleFlag(state, r, c) {
+    if (state.status === "won" || state.status === "lost") {
+      return { ok: false, reason: "ended" };
+    }
+    if (!inBounds(state, r, c)) return { ok: false, reason: "oob" };
+    const cell = state.board[r][c];
+    if (cell.revealed) return { ok: false, reason: "revealed" };
+    cell.flagged = !cell.flagged;
+    state.flagCount += cell.flagged ? 1 : -1;
+    if (state.status === "ready") {
+      // Flagging before the first reveal shouldn't start the clock.
+    }
+    return { ok: true, flagged: cell.flagged, flagCount: state.flagCount };
+  }
+
+  function chord(state, r, c) {
+    if (state.status === "won" || state.status === "lost") {
+      return { ok: false, reason: "ended" };
+    }
+    if (!inBounds(state, r, c)) return { ok: false, reason: "oob" };
+    const cell = state.board[r][c];
+    if (!cell.revealed || cell.mine) return { ok: false, reason: "not-numbered" };
+    if (cell.adjacent === 0) return { ok: false, reason: "zero" };
+
+    const neigh = neighbors(state, r, c);
+    let flags = 0;
+    for (let i = 0; i < neigh.length; i++) {
+      if (state.board[neigh[i][0]][neigh[i][1]].flagged) flags++;
+    }
+    if (flags !== cell.adjacent) {
+      return { ok: false, reason: "unsatisfied", flags, adjacent: cell.adjacent };
+    }
+
+    const opened = [];
+    let hitMine = false;
+    for (let i = 0; i < neigh.length; i++) {
+      const [nr, nc] = neigh[i];
+      const ncell = state.board[nr][nc];
+      if (ncell.flagged || ncell.revealed) continue;
+      const result = reveal(state, nr, nc);
+      if (result.ok && result.opened) {
+        for (let j = 0; j < result.opened.length; j++) opened.push(result.opened[j]);
+      }
+      if (result.hitMine) {
+        hitMine = true;
+        break;
+      }
+    }
+    return { ok: true, hitMine, opened, status: state.status };
+  }
+
+  function elapsedSeconds(state, now) {
+    if (!state.startedAt) return 0;
+    const end = state.endedAt || now || Date.now();
+    return Math.floor((end - state.startedAt) / 1000);
+  }
+
+  function countMines(state) {
+    let n = 0;
+    for (let r = 0; r < state.rows; r++) {
+      for (let c = 0; c < state.cols; c++) {
+        if (state.board[r][c].mine) n++;
+      }
+    }
+    return n;
+  }
+
+  const STORAGE_KEY = "graymines-best";
+
+  function loadBests() {
+    try {
+      const raw = typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { easy: null, medium: null, hard: null };
+      const data = JSON.parse(raw);
+      return {
+        easy: typeof data.easy === "number" ? data.easy : null,
+        medium: typeof data.medium === "number" ? data.medium : null,
+        hard: typeof data.hard === "number" ? data.hard : null,
+      };
+    } catch (e) {
+      return { easy: null, medium: null, hard: null };
+    }
+  }
+
+  function saveBest(difficulty, seconds) {
+    const bests = loadBests();
+    const prev = bests[difficulty];
+    if (prev == null || seconds < prev) {
+      bests[difficulty] = seconds;
+      try {
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(bests));
+        }
+      } catch (e) { /* private mode */ }
+      return { record: true, bests };
+    }
+    return { record: false, bests };
+  }
+
+  return {
+    DIFFICULTY,
+    STORAGE_KEY,
+    createGame,
+    placeMines,
+    computeAdjacents,
+    neighbors,
+    inBounds,
+    reveal,
+    toggleFlag,
+    chord,
+    minesRemaining,
+    checkWin,
+    elapsedSeconds,
+    countMines,
+    loadBests,
+    saveBest,
+  };
+});
+
+  </script>
+  <script>
+(function () {
+  "use strict";
+  const G = window.GrayMines;
+  const LONG_MS = 350;
+  const MOVE_CANCEL_PX = 14;
+
+  const $ = (sel) => document.querySelector(sel);
+  const boardEl = $("#board");
+  const minesEl = $("#mines");
+  const timerEl = $("#timer");
+  const bestEl = $("#best");
+  const restartEl = $("#restart");
+  const flagBtn = $("#flag-btn");
+  const overlay = $("#overlay");
+  const overlayTitle = $("#overlay-title");
+  const overlaySub = $("#overlay-sub");
+  const overlayBtn = $("#overlay-btn");
+  const hintEl = $("#ios-hint");
+  const hintDismiss = $("#hint-dismiss");
+
+  let game = null;
+  let difficulty = "easy";
+  let flagMode = false;
+  let timerId = null;
+  let cells = []; // [r][c] -> button
+
+  function formatTime(s) {
+    s = Math.max(0, s | 0);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m + ":" + String(sec).padStart(2, "0");
+  }
+
+  function isStandalone() {
+    return (
+      window.navigator.standalone === true ||
+      window.matchMedia("(display-mode: standalone)").matches
+    );
+  }
+
+  function loadDifficulty() {
+    try {
+      const d = localStorage.getItem("graymines-difficulty");
+      if (d && G.DIFFICULTY[d]) return d;
+    } catch (e) { /* ignore */ }
+    return "easy";
+  }
+
+  function saveDifficulty(d) {
+    try { localStorage.setItem("graymines-difficulty", d); } catch (e) { /* ignore */ }
+  }
+
+  function updateBestLabel() {
+    const bests = G.loadBests();
+    const v = bests[difficulty];
+    bestEl.textContent = v == null ? "Best —" : "Best " + formatTime(v);
+  }
+
+  function updateHUD() {
+    if (!game) return;
+    const remaining = G.minesRemaining(game);
+    minesEl.textContent = String(remaining);
+    minesEl.classList.toggle("warn", remaining < 0);
+    timerEl.textContent = formatTime(G.elapsedSeconds(game));
+  }
+
+  function startTimer() {
+    stopTimer();
+    timerId = setInterval(updateHUD, 200);
+  }
+
+  function stopTimer() {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  }
+
+  function paintCell(r, c) {
+    const el = cells[r][c];
+    const cell = game.board[r][c];
+    el.className = "cell";
+    el.textContent = "";
+    el.removeAttribute("data-n");
+    el.setAttribute("aria-label", "hidden");
+    if (cell.flagged && !(game.status === "lost" && cell.mine && cell.revealed && !cell.exploded)) {
+      el.classList.add("flagged");
+      el.setAttribute("aria-label", "flagged");
+      el.innerHTML = '<span class="flag" aria-hidden="true"></span>';
+      if (game.status === "lost" && !cell.mine) {
+        el.classList.add("wrong");
+        el.setAttribute("aria-label", "wrong flag");
+      }
+      return;
+    }
+    if (!cell.revealed) {
+      return;
+    }
+    el.classList.add("open");
+    if (cell.mine) {
+      el.classList.add(cell.exploded ? "boom" : "mine");
+      el.innerHTML = '<span class="ore" aria-hidden="true"></span>';
+      el.setAttribute("aria-label", "mine");
+      return;
+    }
+    if (cell.adjacent > 0) {
+      el.dataset.n = String(cell.adjacent);
+      el.textContent = String(cell.adjacent);
+      el.setAttribute("aria-label", cell.adjacent + " nearby");
+    } else {
+      el.setAttribute("aria-label", "empty");
+    }
+  }
+
+  function paintAll() {
+    for (let r = 0; r < game.rows; r++) {
+      for (let c = 0; c < game.cols; c++) paintCell(r, c);
+    }
+    updateHUD();
+  }
+
+  function showEnd() {
+    stopTimer();
+    updateHUD();
+    paintAll();
+    overlay.hidden = false;
+    if (game.status === "won") {
+      const t = G.elapsedSeconds(game);
+      const saved = G.saveBest(difficulty, t);
+      overlayTitle.textContent = "Clear";
+      overlaySub.textContent = formatTime(t) + (saved.record ? "  ·  new best" : "");
+      overlayBtn.textContent = "Play again";
+      overlay.classList.add("win");
+      overlay.classList.remove("lose");
+      updateBestLabel();
+    } else {
+      overlayTitle.textContent = "Mine tripped";
+      overlaySub.textContent = formatTime(G.elapsedSeconds(game));
+      overlayBtn.textContent = "Try again";
+      overlay.classList.add("lose");
+      overlay.classList.remove("win");
+    }
+  }
+
+  function applyResult(res) {
+    if (!res || !res.ok) {
+      updateHUD();
+      return;
+    }
+    if (game.status === "playing" && !timerId) startTimer();
+    if (res.opened) {
+      for (let i = 0; i < res.opened.length; i++) {
+        paintCell(res.opened[i][0], res.opened[i][1]);
+      }
+    } else {
+      paintAll();
+    }
+    updateHUD();
+    if (game.status === "won" || game.status === "lost") showEnd();
+  }
+
+  function onReveal(r, c) {
+    const cell = game.board[r][c];
+    if (cell.revealed && cell.adjacent > 0) {
+      applyResult(G.chord(game, r, c));
+      // chord may open many cells; safest to refresh opened + neighbors
+      if (game.status !== "ready") paintAll();
+      if (game.status === "won" || game.status === "lost") showEnd();
+      return;
+    }
+    applyResult(G.reveal(game, r, c));
+  }
+
+  function onFlag(r, c) {
+    const res = G.toggleFlag(game, r, c);
+    if (res.ok) {
+      paintCell(r, c);
+      updateHUD();
+      try {
+        if (navigator.vibrate) navigator.vibrate(15);
+      } catch (e) { /* unsupported */ }
+    }
+  }
+
+  function bindCell(btn, r, c) {
+    let timer = null;
+    let longFired = false;
+    let sx = 0, sy = 0;
+    let pointerId = null;
+
+    function clear() {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    }
+
+    btn.addEventListener("pointerdown", (e) => {
+      if (e.button != null && e.button !== 0) return;
+      pointerId = e.pointerId;
+      longFired = false;
+      sx = e.clientX;
+      sy = e.clientY;
+      try { btn.setPointerCapture(e.pointerId); } catch (err) { /* old safari */ }
+      clear();
+      timer = setTimeout(() => {
+        timer = null;
+        longFired = true;
+        if (!flagMode) onFlag(r, c);
+      }, LONG_MS);
+    });
+
+    btn.addEventListener("pointermove", (e) => {
+      if (pointerId == null) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) clear();
+    });
+
+    function endPress(e) {
+      if (pointerId == null) return;
+      const wasLong = longFired;
+      const hadTimer = !!timer;
+      clear();
+      pointerId = null;
+      if (e && e.type === "pointercancel") return;
+      if (wasLong) return; // already flagged
+      if (!hadTimer && !wasLong) {
+        // cancelled by move
+      }
+      // If timer was cleared by move, hadTimer is false and longFired is false — treat as cancel if moved
+      if (e) {
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) return;
+      }
+      if (flagMode) onFlag(r, c);
+      else onReveal(r, c);
+    }
+
+    btn.addEventListener("pointerup", endPress);
+    btn.addEventListener("pointercancel", () => {
+      clear();
+      pointerId = null;
+    });
+
+    btn.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      onFlag(r, c);
+    });
+  }
+
+  function buildBoard() {
+    boardEl.innerHTML = "";
+    boardEl.style.setProperty("--cols", String(game.cols));
+    boardEl.style.setProperty("--rows", String(game.rows));
+    boardEl.dataset.difficulty = difficulty;
+    cells = [];
+    const frag = document.createDocumentFragment();
+    for (let r = 0; r < game.rows; r++) {
+      cells[r] = [];
+      for (let c = 0; c < game.cols; c++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cell";
+        btn.dataset.r = String(r);
+        btn.dataset.c = String(c);
+        bindCell(btn, r, c);
+        cells[r][c] = btn;
+        frag.appendChild(btn);
+      }
+    }
+    boardEl.appendChild(frag);
+  }
+
+  function newGame(diff) {
+    if (diff) difficulty = diff;
+    saveDifficulty(difficulty);
+    stopTimer();
+    overlay.hidden = true;
+    overlay.classList.remove("win", "lose");
+    game = G.createGame(difficulty);
+    document.querySelectorAll(".diff").forEach((b) => {
+      b.classList.toggle("on", b.dataset.diff === difficulty);
+      b.setAttribute("aria-pressed", b.dataset.diff === difficulty ? "true" : "false");
+    });
+    buildBoard();
+    updateHUD();
+    updateBestLabel();
+    restartEl.classList.remove("spin");
+    void restartEl.offsetWidth;
+    restartEl.classList.add("spin");
+  }
+
+  function setFlagMode(on) {
+    flagMode = on;
+    flagBtn.classList.toggle("on", on);
+    flagBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    document.body.classList.toggle("flag-mode", on);
+  }
+
+  flagBtn.addEventListener("click", () => setFlagMode(!flagMode));
+  restartEl.addEventListener("click", () => newGame());
+  overlayBtn.addEventListener("click", () => newGame());
+
+  document.querySelectorAll(".diff").forEach((b) => {
+    b.addEventListener("click", () => newGame(b.dataset.diff));
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "f" || e.key === "F") {
+      setFlagMode(!flagMode);
+    } else if (e.key === "r" || e.key === "R") {
+      newGame();
+    } else if (e.key === "Escape") {
+      if (!overlay.hidden) newGame();
+    }
+  });
+
+  // iOS add-to-home-screen hint, once
+  try {
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const dismissed = localStorage.getItem("graymines-hint-dismissed") === "1";
+    if (isiOS && !isStandalone() && !dismissed) {
+      hintEl.hidden = false;
+    }
+  } catch (e) { /* ignore */ }
+
+  hintDismiss.addEventListener("click", () => {
+    hintEl.hidden = true;
+    try { localStorage.setItem("graymines-hint-dismissed", "1"); } catch (e) { /* ignore */ }
+  });
+
+  if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("./sw.js").catch(() => { /* offline file or missing sw */ });
+  }
+
+  difficulty = loadDifficulty();
+  newGame(difficulty);
+})();
+
+  </script>
+</body>
+</html>
