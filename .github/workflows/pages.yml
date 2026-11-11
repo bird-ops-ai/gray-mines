@@ -25,6 +25,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # Pages is not enabled yet, and the agent token cannot call the
+          # Pages API. The workflow token tries to create the site here.
+          enablement: true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
