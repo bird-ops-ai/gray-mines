@@ -53,10 +53,30 @@ function test(name, fn) {
   }
 }
 
-test("page exposes a Stats button and the worker cache moved to v4", () => {
+test("board pinch zoom stays on the board and remembers difficulty", () => {
+  assert.ok(html.includes("user-scalable=no"));
+  assert.ok(html.includes('id="zoom-reset"'));
+  assert.ok(html.includes("const ZOOM_MAX = 3"));
+  assert.ok(html.includes("const ZOOM_KEY = \"graymines-zoom\""));
+  assert.ok(html.includes("touch-action: none"));
+  assert.ok(html.includes("function cancelBoardPresses"));
+  assert.ok(html.includes("cellsBlocked()"));
+});
+
+test("long-press hold ring matches the 300ms threshold", () => {
+  assert.ok(html.includes("const LONG_MS = 300;"));
+  assert.ok(html.includes('setAttribute("class", "hold")'));
+  assert.ok(html.includes("held-ready"));
+  assert.ok(html.includes("hold-draw"));
+  assert.ok(html.includes(".cell > .hold { display: none; }"));
+  assert.ok(html.includes("function finishHold"));
+  assert.ok(html.includes("function clearHold"));
+});
+
+test("page exposes a Stats button and the worker cache moved to v5", () => {
   assert.ok(html.includes('id="stats-btn"'));
   assert.ok(html.includes(">Stats<"));
-  assert.ok(sw.includes('const CACHE = "gray-mines-v4"'));
+  assert.ok(sw.includes('const CACHE = "gray-mines-v5"'));
   assert.ok(sw.includes("skipWaiting"));
   assert.ok(sw.includes("clients.claim"));
   assert.ok(html.includes('updateViaCache: "none"'));

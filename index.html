@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#14110e">
   <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,7 +177,7 @@ header {
   min-width: 0;
 }
 
-.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle, #haptic-test {
+.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle, #haptic-test, #zoom-reset {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
@@ -235,16 +235,16 @@ header {
 }
 
 .board-wrap {
+  position: relative;
   flex: 1;
   min-height: 0;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overflow: hidden;
+  overscroll-behavior: none;
   display: flex;
   justify-content: safe center;
   align-items: safe center;
   padding-bottom: 8px;
-  touch-action: pan-x pan-y;
+  touch-action: none;
 }
 
 #board {
@@ -255,8 +255,25 @@ header {
   gap: 3px;
   width: min(100%, calc(var(--cols) * 44px));
   min-width: min(100%, calc(var(--cols) * 28px));
-  touch-action: manipulation;
+  transform-origin: 0 0;
+  touch-action: none;
 }
+
+#zoom-reset {
+  position: absolute;
+  z-index: 6;
+  top: 8px;
+  right: 8px;
+  border: 1px solid var(--line);
+  background: rgba(28, 24, 20, 0.92);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+#zoom-reset[hidden] { display: none; }
 
 .cell .face {
   display: grid;
@@ -275,7 +292,7 @@ header {
   margin: 0;
   padding: 0;
   border-radius: inherit;
-  touch-action: manipulation;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
@@ -344,6 +361,40 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
 
 .cell.flagged { color: var(--accent); }
 
+.cell > .hold {
+  position: absolute;
+  inset: 1px;
+  z-index: 3;
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.cell > .hold circle {
+  fill: none;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.cell > .hold circle.track {
+  stroke: rgba(224, 164, 90, 0.35);
+}
+
+.cell > .hold circle.prog {
+  stroke: var(--accent);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: hold-draw var(--hold, 300ms) linear forwards;
+}
+
+@keyframes hold-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.cell.held-ready {
+  box-shadow: inset 0 0 0 2px var(--accent), 0 0 16px rgba(224, 164, 90, 0.8);
+  filter: brightness(1.45);
+}
+
 .cell.flash { animation: cell-flash 280ms ease; }
 
 @keyframes cell-flash {
@@ -375,6 +426,17 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   .cell.flash,
   .flag.pop { animation: none; }
+  .cell > .hold { display: none; }
+  .cell.held {
+    background: #3d342b;
+    box-shadow: inset 0 0 0 2px var(--accent-dim);
+    filter: none;
+  }
+  .cell.held-ready {
+    background: #6b5132;
+    box-shadow: inset 0 0 0 3px var(--accent);
+    filter: none;
+  }
 }
 
 .flag::after {
@@ -780,8 +842,9 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       </button>
     </div>
     <div id="best">Best —</div>
-    <div class="board-wrap">
+    <div class="board-wrap" id="board-wrap">
       <div id="board" role="grid" aria-label="Game board"></div>
+      <button type="button" id="zoom-reset" hidden>1×</button>
     </div>
   </div>
   <div id="overlay" class="overlay" hidden>
@@ -1360,11 +1423,38 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
 (function () {
   "use strict";
   const G = window.GrayMines;
-  const LONG_MS = 350;
+  const LONG_MS = 300;
   const MOVE_CANCEL_PX = 14;
 
   const $ = (sel) => document.querySelector(sel);
   const boardEl = $("#board");
+  const boardWrap = $("#board-wrap");
+  const zoomReset = $("#zoom-reset");
+  const ZOOM_MIN = 1;
+  const ZOOM_MAX = 3;
+  const ZOOM_KEY = "graymines-zoom";
+  const pressGuards = new Set();
+  const zoom = {
+    scale: 1,
+    x: 0,
+    y: 0,
+    mode: "idle",
+    pointers: new Map(),
+    panOrigin: null,
+    startDist: 1,
+    startScale: 1,
+    localX: 0,
+    localY: 0,
+  };
+  let lastEmptyTap = 0;
+
+  function cellsBlocked() {
+    return zoom.mode === "pinch" || zoom.mode === "pan";
+  }
+
+  function cancelBoardPresses() {
+    pressGuards.forEach((fn) => fn());
+  }
   const minesEl = $("#mines");
   const timerEl = $("#timer");
   const bestEl = $("#best");
@@ -1663,15 +1753,73 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     let sx = 0, sy = 0;
     let pointerId = null;
 
-    function clear() {
+    function stopTimer() {
       if (timer) {
         clearTimeout(timer);
         timer = null;
       }
     }
 
+    function clearHold() {
+      const ring = btn.querySelector(":scope > .hold");
+      if (ring) ring.remove();
+      btn.classList.remove("held", "held-ready");
+    }
+
+    function showHold() {
+      const cell = game.board[r][c];
+      if (flagMode || !cell || cell.revealed || cell.flagged) return;
+      if (game.status === "won" || game.status === "lost") return;
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "hold");
+      svg.setAttribute("viewBox", "0 0 36 36");
+      svg.setAttribute("aria-hidden", "true");
+      for (let i = 0; i < 2; i++) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", i === 0 ? "track" : "prog");
+        circle.setAttribute("cx", "18");
+        circle.setAttribute("cy", "18");
+        circle.setAttribute("r", "15");
+        circle.setAttribute("pathLength", "100");
+        svg.appendChild(circle);
+      }
+      btn.classList.add("held");
+      btn.appendChild(svg);
+    }
+
+    function finishHold() {
+      const ring = btn.querySelector(":scope > .hold");
+      if (ring) ring.remove();
+      btn.classList.remove("held");
+      btn.classList.add("held-ready");
+    }
+
+    let swallowed = false;
+
+    function abortPress() {
+      stopTimer();
+      clearHold();
+      try {
+        if (pointerId != null) {
+          const capHit = btn.querySelector(":scope > .haptic-hit");
+          if (capHit && capHit.hasPointerCapture(pointerId)) capHit.releasePointerCapture(pointerId);
+          if (btn.hasPointerCapture(pointerId)) btn.releasePointerCapture(pointerId);
+        }
+      } catch (err) { /* already released */ }
+      pointerId = null;
+      longFired = false;
+      hapticDue = false;
+      swallowed = true;
+    }
+    pressGuards.add(abortPress);
+
     btn.addEventListener("pointerdown", (e) => {
       if (e.button != null && e.button !== 0) return;
+      if (cellsBlocked()) {
+        abortPress();
+        return;
+      }
+      swallowed = false;
       pointerId = e.pointerId;
       longFired = false;
       hapticDue = false;
@@ -1683,26 +1831,41 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       const hit = btn.querySelector(":scope > .haptic-hit");
       const cap = (hit && hapticsOn() && hit.contains(e.target)) ? hit : btn;
       try { cap.setPointerCapture(e.pointerId); } catch (err) { /* old safari */ }
-      clear();
+      stopTimer();
+      clearHold();
+      showHold();
       timer = setTimeout(() => {
         timer = null;
         longFired = true;
-        if (!flagMode && onFlag(r, c)) hapticDue = true;
+        if (!flagMode && onFlag(r, c)) {
+          hapticDue = true;
+          finishHold();
+        } else {
+          clearHold();
+        }
       }, LONG_MS);
     });
 
     btn.addEventListener("pointermove", (e) => {
-      if (pointerId == null) return;
+      if (pointerId == null || !timer) return;
       const dx = e.clientX - sx, dy = e.clientY - sy;
-      if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) clear();
+      if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) {
+        stopTimer();
+        clearHold();
+      }
     });
 
     function endPress(e) {
       if (pointerId == null) return;
+      if (swallowed || cellsBlocked()) {
+        abortPress();
+        return;
+      }
       const wasLong = longFired;
       const owed = hapticDue;
       const hadTimer = !!timer;
-      clear();
+      stopTimer();
+      clearHold();
       pointerId = null;
       hapticDue = false;
       if (e && e.type === "pointercancel") return;
@@ -1733,7 +1896,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
 
     btn.addEventListener("pointerup", endPress);
     btn.addEventListener("pointercancel", () => {
-      clear();
+      stopTimer();
+      clearHold();
       pointerId = null;
       hapticDue = false;
     });
@@ -1750,6 +1914,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   }
 
   function buildBoard() {
+    pressGuards.clear();
     boardEl.innerHTML = "";
     boardEl.style.setProperty("--cols", String(game.cols));
     boardEl.style.setProperty("--rows", String(game.rows));
@@ -1794,6 +1959,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       b.setAttribute("aria-pressed", b.dataset.diff === difficulty ? "true" : "false");
     });
     buildBoard();
+    restoreZoom();
     updateHUD();
     updateBestLabel();
     restartEl.classList.remove("spin");
@@ -1936,6 +2102,190 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     }).catch(() => { /* offline file or missing sw */ });
   }
 
+  function clampScale(n) {
+    return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, n));
+  }
+
+  function readZooms() {
+    try {
+      const data = JSON.parse(localStorage.getItem(ZOOM_KEY) || "{}");
+      return data && typeof data === "object" ? data : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function persistZoom() {
+    try {
+      const all = readZooms();
+      all[difficulty] = Math.round(zoom.scale * 100) / 100;
+      localStorage.setItem(ZOOM_KEY, JSON.stringify(all));
+    } catch (e) { /* private mode */ }
+  }
+
+  function clampPan() {
+    const bw = boardEl.offsetWidth * zoom.scale;
+    const bh = boardEl.offsetHeight * zoom.scale;
+    const left = boardEl.offsetLeft;
+    const top = boardEl.offsetTop;
+    const W = boardWrap.clientWidth;
+    const H = boardWrap.clientHeight;
+    if (bw <= W) zoom.x = (W - bw) / 2 - left;
+    else {
+      const minX = W - bw - left;
+      const maxX = -left;
+      if (zoom.x < minX) zoom.x = minX;
+      if (zoom.x > maxX) zoom.x = maxX;
+    }
+    if (bh <= H) zoom.y = (H - bh) / 2 - top;
+    else {
+      const minY = H - bh - top;
+      const maxY = -top;
+      if (zoom.y < minY) zoom.y = minY;
+      if (zoom.y > maxY) zoom.y = maxY;
+    }
+  }
+
+  function applyZoom() {
+    boardEl.style.transform = "translate(" + zoom.x.toFixed(2) + "px," + zoom.y.toFixed(2) + "px) scale(" + zoom.scale.toFixed(4) + ")";
+    const zoomed = zoom.scale > 1.02;
+    zoomReset.hidden = !zoomed;
+    if (zoomed) zoomReset.textContent = (Math.round(zoom.scale * 10) / 10).toFixed(1) + "×";
+  }
+
+  function restoreZoom() {
+    const saved = readZooms()[difficulty];
+    const scale = typeof saved === "number" && isFinite(saved) ? clampScale(saved) : 1;
+    zoom.scale = scale;
+    zoom.x = 0;
+    zoom.y = 0;
+    zoom.mode = "idle";
+    clampPan();
+    applyZoom();
+  }
+
+  function resetZoom() {
+    zoom.scale = 1;
+    zoom.x = 0;
+    zoom.y = 0;
+    clampPan();
+    applyZoom();
+    persistZoom();
+  }
+
+  function wrapPoint(e) {
+    const r = boardWrap.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function pointerPair() {
+    const pts = Array.from(zoom.pointers.values());
+    return pts.length >= 2 ? pts : null;
+  }
+
+  function beginPinch() {
+    const pts = pointerPair();
+    if (!pts) return;
+    const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+    const midX = (pts[0].x + pts[1].x) / 2;
+    const midY = (pts[0].y + pts[1].y) / 2;
+    zoom.startDist = d;
+    zoom.startScale = zoom.scale;
+    zoom.localX = (midX - zoom.x - boardEl.offsetLeft) / zoom.scale;
+    zoom.localY = (midY - zoom.y - boardEl.offsetTop) / zoom.scale;
+  }
+
+  function canPan() {
+    if (zoom.scale > 1.01) return true;
+    return boardEl.offsetWidth > boardWrap.clientWidth + 1 ||
+      boardEl.offsetHeight > boardWrap.clientHeight + 1;
+  }
+
+  function onWrapDown(e) {
+    if (e.button != null && e.button !== 0) return;
+    zoom.pointers.set(e.pointerId, wrapPoint(e));
+    if (zoom.pointers.size >= 2) {
+      zoom.mode = "pinch";
+      beginPinch();
+      cancelBoardPresses();
+      zoom.pointers.forEach(function (_, id) {
+        try { boardWrap.setPointerCapture(id); } catch (err) { /* not down */ }
+      });
+      return;
+    }
+    zoom.panOrigin = { id: e.pointerId, x: zoom.x, y: zoom.y, px: e.clientX, py: e.clientY };
+  }
+
+  function onWrapMove(e) {
+    if (!zoom.pointers.has(e.pointerId)) return;
+    zoom.pointers.set(e.pointerId, wrapPoint(e));
+    if (zoom.mode === "pinch" && zoom.pointers.size >= 2) {
+      const pts = pointerPair();
+      const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+      const scale = clampScale(zoom.startScale * (d / zoom.startDist));
+      const midX = (pts[0].x + pts[1].x) / 2;
+      const midY = (pts[0].y + pts[1].y) / 2;
+      zoom.scale = scale;
+      zoom.x = midX - zoom.localX * scale - boardEl.offsetLeft;
+      zoom.y = midY - zoom.localY * scale - boardEl.offsetTop;
+      clampPan();
+      applyZoom();
+      return;
+    }
+    if (zoom.pointers.size !== 1 || !zoom.panOrigin || zoom.panOrigin.id !== e.pointerId) return;
+    const dx = e.clientX - zoom.panOrigin.px;
+    const dy = e.clientY - zoom.panOrigin.py;
+    if (zoom.mode !== "pan") {
+      if (dx * dx + dy * dy <= MOVE_CANCEL_PX * MOVE_CANCEL_PX) return;
+      if (!canPan()) return;
+      zoom.mode = "pan";
+      cancelBoardPresses();
+      try { boardWrap.setPointerCapture(e.pointerId); } catch (err) { /* not down */ }
+    }
+    zoom.x = zoom.panOrigin.x + dx;
+    zoom.y = zoom.panOrigin.y + dy;
+    clampPan();
+    applyZoom();
+  }
+
+  function onWrapUp(e) {
+    const wasMode = zoom.mode;
+    zoom.pointers.delete(e.pointerId);
+    if (wasMode === "pinch" && zoom.pointers.size < 2) persistZoom();
+    if (zoom.pointers.size >= 2) {
+      beginPinch();
+      return;
+    }
+    if (zoom.pointers.size === 1) {
+      if (wasMode === "pinch") zoom.mode = "pan";
+      zoom.panOrigin = null;
+      return;
+    }
+    zoom.mode = "idle";
+    zoom.panOrigin = null;
+    if (wasMode !== "idle") return;
+    if (e.target.closest && (e.target.closest(".cell") || e.target.closest("#zoom-reset"))) return;
+    const now = Date.now();
+    if (now - lastEmptyTap < 320) {
+      resetZoom();
+      lastEmptyTap = 0;
+    } else {
+      lastEmptyTap = now;
+    }
+  }
+
+  boardWrap.addEventListener("pointerdown", onWrapDown, true);
+  boardWrap.addEventListener("pointermove", onWrapMove, true);
+  boardWrap.addEventListener("pointerup", onWrapUp);
+  boardWrap.addEventListener("pointercancel", onWrapUp);
+  boardWrap.addEventListener("gesturestart", (e) => e.preventDefault());
+  boardWrap.addEventListener("gesturechange", (e) => e.preventDefault());
+  zoomReset.addEventListener("click", (e) => {
+    e.stopPropagation();
+    resetZoom();
+  });
+
+  document.documentElement.style.setProperty("--hold", LONG_MS + "ms");
   syncHapticToggle();
   difficulty = loadDifficulty();
   newGame(difficulty);
