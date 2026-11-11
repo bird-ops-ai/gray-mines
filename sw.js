@@ -1,5 +1,5 @@
 /* Gray Mines service worker — cache the app shell for offline play.
-   Rebuild marker: queued run cancelled, cache stays gray-mines-v5. */
+   Rebuild marker: after cancelled runner, cache stays gray-mines-v5. */
 const CACHE = "gray-mines-v5";
 const ASSETS = [
   "./",
