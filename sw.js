@@ -1,4 +1,5 @@
-/* Gray Mines service worker — cache the app shell for offline play. */
+/* Gray Mines service worker — cache the app shell for offline play.
+   Rebuild marker: c008702 follow-up, cache stays gray-mines-v5. */
 const CACHE = "gray-mines-v5";
 const ASSETS = [
   "./",
