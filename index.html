@@ -177,7 +177,7 @@ header {
   min-width: 0;
 }
 
-.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle, #haptic-test, #zoom-reset {
+.diff, #flag-btn, #hint-dismiss, #overlay-btn, #overlay-view, #board-new, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle, #haptic-test, #zoom-reset {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
@@ -479,11 +479,20 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
 }
 
 .cell.boom {
-  background: #4a2218;
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background: #8f3a2e;
+  box-shadow: inset 0 0 0 2px var(--danger);
+}
+
+.cell.boom .ore {
+  box-shadow: 0 0 0 2px #3a1612, 0 0 10px rgba(224, 122, 95, 0.75);
 }
 
 .cell.mine.open { background: #241c16; }
+
+.cell.wrong .flag { opacity: 0.45; }
+
+.cell.wrong::before,
+.cell.wrong::after { z-index: 4; }
 
 .overlay {
   position: fixed;
@@ -499,6 +508,69 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
 }
 
 .overlay[hidden] { display: none; }
+
+.overlay.lose {
+  inset: auto 0 0 0;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  align-items: flex-end;
+  padding: 0 12px calc(var(--safe-b) + 12px);
+  pointer-events: none;
+}
+
+.overlay.lose .card {
+  pointer-events: auto;
+  width: min(440px, 100%);
+  padding: 14px 14px 12px;
+}
+
+.overlay.lose #overlay-title { font-size: 22px; }
+
+.overlay.lose #overlay-sub { margin: 4px 0 0; font-size: 14px; }
+
+.overlay.lose #overlay-stats { margin: 2px 0 12px; }
+
+.end-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.end-actions #overlay-btn,
+.end-actions #overlay-view {
+  flex: 1;
+  width: auto;
+}
+
+#overlay-view {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 12px;
+  padding: 13px 12px;
+}
+
+#overlay-view[hidden] { display: none; }
+
+#board-new {
+  position: fixed;
+  z-index: 24;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 14px);
+  transform: translateX(-50%);
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #1a140c;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 12px 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+#board-new[hidden] { display: none; }
 
 .card {
   width: min(320px, 100%);
@@ -852,9 +924,13 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       <h2 id="overlay-title"></h2>
       <p id="overlay-sub"></p>
       <p id="overlay-stats"></p>
-      <button type="button" id="overlay-btn">Play again</button>
+      <div class="end-actions">
+        <button type="button" id="overlay-view" hidden>View board</button>
+        <button type="button" id="overlay-btn">Play again</button>
+      </div>
     </div>
   </div>
+  <button type="button" id="board-new" hidden>New game</button>
   <div id="stats-overlay" class="overlay stats-overlay" hidden>
     <div class="card stats-card" role="dialog" aria-modal="true" aria-labelledby="stats-title">
       <div class="stats-head">
@@ -1465,6 +1541,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   const overlaySub = $("#overlay-sub");
   const overlayStats = $("#overlay-stats");
   const overlayBtn = $("#overlay-btn");
+  const overlayView = $("#overlay-view");
+  const boardNew = $("#board-new");
   const hintEl = $("#ios-hint");
   const hintDismiss = $("#hint-dismiss");
   const statsBtn = $("#stats-btn");
@@ -1592,7 +1670,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     el.removeAttribute("data-n");
     face.replaceChildren();
     el.setAttribute("aria-label", "hidden");
-    if (cell.flagged && !(game.status === "lost" && cell.mine && cell.revealed && !cell.exploded)) {
+    if (cell.flagged) {
       el.classList.add("flagged");
       el.setAttribute("aria-label", "flagged");
       const flag = document.createElement("span");
@@ -1602,6 +1680,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       if (game.status === "lost" && !cell.mine) {
         el.classList.add("wrong");
         el.setAttribute("aria-label", "wrong flag");
+      } else if (game.status === "lost" && cell.mine) {
+        el.setAttribute("aria-label", "flagged mine");
       }
     } else if (!cell.revealed) {
       /* still covered */
@@ -1613,7 +1693,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         ore.className = "ore";
         ore.setAttribute("aria-hidden", "true");
         face.appendChild(ore);
-        el.setAttribute("aria-label", "mine");
+        el.setAttribute("aria-label", cell.exploded ? "tripped mine" : "mine");
       } else if (cell.adjacent > 0) {
         el.dataset.n = String(cell.adjacent);
         face.textContent = String(cell.adjacent);
@@ -1667,15 +1747,24 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     if (won) {
       overlayTitle.textContent = "Clear";
       overlayBtn.textContent = "Play again";
+      overlayView.hidden = true;
+      boardNew.hidden = true;
       overlay.classList.add("win");
       overlay.classList.remove("lose");
       updateBestLabel();
     } else {
       overlayTitle.textContent = "Mine tripped";
-      overlayBtn.textContent = "Try again";
+      overlayBtn.textContent = "New game";
+      overlayView.hidden = false;
+      boardNew.hidden = true;
       overlay.classList.add("lose");
       overlay.classList.remove("win");
     }
+  }
+
+  function viewBoard() {
+    overlay.hidden = true;
+    if (game && game.status === "lost") boardNew.hidden = false;
   }
 
   function applyResult(res) {
@@ -1953,6 +2042,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     stopTimer();
     overlay.hidden = true;
     overlay.classList.remove("win", "lose");
+    overlayView.hidden = true;
+    boardNew.hidden = true;
     game = G.createGame(difficulty);
     document.querySelectorAll("#diff-segs .diff").forEach((b) => {
       b.classList.toggle("on", b.dataset.diff === difficulty);
@@ -2033,6 +2124,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   flagBtn.addEventListener("click", () => setFlagMode(!flagMode));
   restartEl.addEventListener("click", () => newGame());
   overlayBtn.addEventListener("click", () => newGame());
+  overlayView.addEventListener("click", viewBoard);
+  boardNew.addEventListener("click", () => newGame());
   statsBtn.addEventListener("click", openStats);
   statsClose.addEventListener("click", closeStats);
   statsOverlay.addEventListener("click", (e) => {
@@ -2077,7 +2170,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     } else if (e.key === "r" || e.key === "R") {
       newGame();
     } else if (e.key === "Escape") {
-      if (!overlay.hidden) newGame();
+      if (!overlay.hidden && overlay.classList.contains("lose")) viewBoard();
+      else if (!overlay.hidden || !boardNew.hidden) newGame();
     }
   });
 

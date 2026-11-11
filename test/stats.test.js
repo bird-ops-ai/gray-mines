@@ -73,10 +73,34 @@ test("long-press hold ring matches the 300ms threshold", () => {
   assert.ok(html.includes("function clearHold"));
 });
 
-test("page exposes a Stats button and the worker cache moved to v5", () => {
+test("a loss reveals every mine and keeps correct flags", () => {
+  const g = G.createGame({ id: "easy", rows: 3, cols: 3, mines: 2 }, { mines: [[0, 0], [0, 1]] });
+  assert.strictEqual(G.toggleFlag(g, 0, 1).flagged, true);
+  assert.strictEqual(G.toggleFlag(g, 2, 2).flagged, true);
+  const hit = G.reveal(g, 0, 0);
+  assert.strictEqual(hit.hitMine, true);
+  assert.strictEqual(g.status, "lost");
+  assert.strictEqual(g.board[0][0].exploded, true);
+  assert.strictEqual(g.board[0][0].revealed, true);
+  assert.strictEqual(g.board[0][1].mine, true);
+  assert.strictEqual(g.board[0][1].flagged, true);
+  assert.strictEqual(g.board[0][1].revealed, true);
+  assert.strictEqual(g.board[2][2].flagged, true);
+  assert.strictEqual(g.board[2][2].mine, false);
+  assert.strictEqual(g.board[2][2].revealed, false);
+  let revealedMines = 0;
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      if (g.board[r][c].mine && g.board[r][c].revealed) revealedMines++;
+    }
+  }
+  assert.strictEqual(revealedMines, 2);
+});
+
+test("page exposes a Stats button and the worker cache moved to v6", () => {
   assert.ok(html.includes('id="stats-btn"'));
   assert.ok(html.includes(">Stats<"));
-  assert.ok(sw.includes('const CACHE = "gray-mines-v5"'));
+  assert.ok(sw.includes('const CACHE = "gray-mines-v6"'));
   assert.ok(sw.includes("skipWaiting"));
   assert.ok(sw.includes("clients.claim"));
   assert.ok(html.includes('updateViaCache: "none"'));
