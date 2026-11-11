@@ -1,5 +1,5 @@
 /* Gray Mines service worker — cache the app shell for offline play. */
-const CACHE = "gray-mines-v3";
+const CACHE = "gray-mines-v4";
 const ASSETS = [
   "./",
   "./index.html",

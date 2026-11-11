@@ -177,7 +177,7 @@ header {
   min-width: 0;
 }
 
-.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle {
+.diff, #flag-btn, #hint-dismiss, #overlay-btn, #stats-btn, #stats-close, #stats-reset, #stats-reset-cancel, #stats-reset-go, #haptic-toggle, #haptic-test {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
@@ -257,6 +257,42 @@ header {
   min-width: min(100%, calc(var(--cols) * 28px));
   touch-action: manipulation;
 }
+
+.cell .face {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* iOS 26.5+ / 27 only buzzes when the finger hits a switch label.
+   The label covers the cell. The switch stays opacity 0, not display:none. */
+.haptic-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  border-radius: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.haptic-hit input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+}
+
+body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
 
 .cell {
   aspect-ratio: 1;
@@ -587,19 +623,21 @@ header {
   border-color: transparent;
 }
 
-/* Present for hit-testing the iOS switch haptic, but out of layout and AT. */
-#haptic-sink {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 1px;
-  height: 1px;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-  clip-path: inset(50%);
+.haptic-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#haptic-test {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 7px 12px;
 }
 
 .stats-reset { margin-top: 12px; }
@@ -770,7 +808,10 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       <p id="stats-note" class="stats-note" hidden>Best times and the current streak stay with each difficulty. Longest is the highest of those streaks.</p>
       <div class="haptic-row">
         <span id="haptic-caption">Haptics</span>
-        <button type="button" id="haptic-toggle" aria-pressed="true" aria-labelledby="haptic-caption">On</button>
+        <span class="haptic-actions">
+          <button type="button" id="haptic-test">Test haptic</button>
+          <button type="button" id="haptic-toggle" aria-pressed="true" aria-labelledby="haptic-caption">On</button>
+        </span>
       </div>
       <div class="stats-reset">
         <button type="button" id="stats-reset">Reset stats</button>
@@ -783,10 +824,6 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         </div>
       </div>
     </div>
-  </div>
-  <div id="haptic-sink" aria-hidden="true">
-    <input type="checkbox" switch id="haptic-switch" tabindex="-1" aria-hidden="true">
-    <label for="haptic-switch" id="haptic-label"></label>
   </div>
   <script>
 /**
@@ -1350,8 +1387,9 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
   const statsResetCancel = $("#stats-reset-cancel");
   const statsResetGo = $("#stats-reset-go");
   const hapticToggle = $("#haptic-toggle");
-  const hapticLabel = $("#haptic-label");
+  const hapticTest = $("#haptic-test");
   const HAPTIC_KEY = "graymines-haptics";
+  let hapticSeq = 0;
 
   let game = null;
   let difficulty = "easy";
@@ -1412,17 +1450,65 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     }
   }
 
+  function cellFace(el) {
+    let face = el.querySelector(":scope > .face");
+    if (!face) {
+      face = document.createElement("span");
+      face.className = "face";
+      el.insertBefore(face, el.firstChild);
+    }
+    return face;
+  }
+
+  // Finger must hit this label. iOS 26.5 and 27 ignore a scripted click.
+  function mountHapticHit(host, always) {
+    if (host.querySelector(":scope > .haptic-hit")) return;
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.setAttribute("switch", "");
+    input.tabIndex = -1;
+    input.setAttribute("aria-hidden", "true");
+    input.id = "haptic-sw-" + (++hapticSeq);
+    const label = document.createElement("label");
+    label.className = "haptic-hit";
+    label.htmlFor = input.id;
+    label.setAttribute("aria-hidden", "true");
+    if (always) label.dataset.always = "1";
+    label.appendChild(input);
+    label.addEventListener("click", (e) => {
+      if (label.dataset.always === "1") return;
+      if (label.dataset.arm === "1") {
+        label.dataset.arm = "0";
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    input.addEventListener("click", (e) => e.stopPropagation());
+    host.appendChild(label);
+  }
+
+  function armHaptic(el) {
+    if (!hapticsOn()) return;
+    const label = el.querySelector(":scope > .haptic-hit");
+    if (label) label.dataset.arm = "1";
+  }
+
   function paintCell(r, c, fx) {
     const el = cells[r][c];
     const cell = game.board[r][c];
+    const face = cellFace(el);
     el.className = "cell";
-    el.textContent = "";
     el.removeAttribute("data-n");
+    face.replaceChildren();
     el.setAttribute("aria-label", "hidden");
     if (cell.flagged && !(game.status === "lost" && cell.mine && cell.revealed && !cell.exploded)) {
       el.classList.add("flagged");
       el.setAttribute("aria-label", "flagged");
-      el.innerHTML = '<span class="flag" aria-hidden="true"></span>';
+      const flag = document.createElement("span");
+      flag.className = "flag" + (fx && fx.pop ? " pop" : "");
+      flag.setAttribute("aria-hidden", "true");
+      face.appendChild(flag);
       if (game.status === "lost" && !cell.mine) {
         el.classList.add("wrong");
         el.setAttribute("aria-label", "wrong flag");
@@ -1433,21 +1519,21 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       el.classList.add("open");
       if (cell.mine) {
         el.classList.add(cell.exploded ? "boom" : "mine");
-        el.innerHTML = '<span class="ore" aria-hidden="true"></span>';
+        const ore = document.createElement("span");
+        ore.className = "ore";
+        ore.setAttribute("aria-hidden", "true");
+        face.appendChild(ore);
         el.setAttribute("aria-label", "mine");
       } else if (cell.adjacent > 0) {
         el.dataset.n = String(cell.adjacent);
-        el.textContent = String(cell.adjacent);
+        face.textContent = String(cell.adjacent);
         el.setAttribute("aria-label", cell.adjacent + " nearby");
       } else {
         el.setAttribute("aria-label", "empty");
       }
     }
     if (fx && fx.flash) el.classList.add("flash");
-    if (fx && fx.pop) {
-      const flag = el.querySelector(".flag");
-      if (flag) flag.classList.add("pop");
-    }
+    mountHapticHit(el, false);
   }
 
   function paintAll() {
@@ -1538,6 +1624,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
 
   function syncHapticToggle() {
     const on = hapticsOn();
+    document.body.classList.toggle("haptics-on", on);
     hapticToggle.classList.toggle("on", on);
     hapticToggle.setAttribute("aria-pressed", on ? "true" : "false");
     hapticToggle.textContent = on ? "On" : "Off";
@@ -1556,26 +1643,16 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     } catch (e) { /* unsupported */ }
   }
 
-  // iOS Safari has no navigator.vibrate. iOS 18 plays the system switch
-  // haptic when a label for <input type="checkbox" switch> is clicked, and
-  // only during a user gesture. navigator.vibrate has the same limit.
-  // A long-press timer is not a gesture: the flag is drawn there, and both
-  // the switch click and vibrate(15) run on the following pointerup
-  // (touchend). Taps in flag mode and right-click run them in that event.
-  function clickHapticSwitch() {
-    if (!hapticsOn() || !hapticLabel) return;
-    hapticLabel.click();
-  }
-
-  function onFlag(r, c, gesture) {
+  // iOS 26.5 and iOS 27 do not buzz when script clicks a label (WebKit
+  // bug 309082). The finger has to land on the switch's label. Each cell and
+  // the Test button carry that label. A reveal cancels the label activation so
+  // only a flag toggles the switch. The long-press timer only draws the flag;
+  // pointerup arms the label, and the click that follows the touch is the buzz.
+  function onFlag(r, c) {
     const res = G.toggleFlag(game, r, c);
     if (!res.ok) return false;
     paintCell(r, c, { pop: !!res.flagged, flash: true });
     updateHUD();
-    if (gesture) {
-      buzz();
-      clickHapticSwitch();
-    }
     return true;
   }
 
@@ -1600,12 +1677,17 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       hapticDue = false;
       sx = e.clientX;
       sy = e.clientY;
-      try { btn.setPointerCapture(e.pointerId); } catch (err) { /* old safari */ }
+      // Capture on the label so the later click still targets it. Capturing
+      // on the cell would steal the click, and iOS would not toggle the switch.
+      // Do not preventDefault: that can swallow the label activation.
+      const hit = btn.querySelector(":scope > .haptic-hit");
+      const cap = (hit && hapticsOn() && hit.contains(e.target)) ? hit : btn;
+      try { cap.setPointerCapture(e.pointerId); } catch (err) { /* old safari */ }
       clear();
       timer = setTimeout(() => {
         timer = null;
         longFired = true;
-        if (!flagMode && onFlag(r, c, false)) hapticDue = true;
+        if (!flagMode && onFlag(r, c)) hapticDue = true;
       }, LONG_MS);
     });
 
@@ -1625,11 +1707,11 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       hapticDue = false;
       if (e && e.type === "pointercancel") return;
       if (wasLong) {
-        // Timer already drew the flag. pointerup is still the touch gesture,
-        // so the iOS switch click and Android vibrate can run here.
+        // Flag is already drawn. Arm the label so its upcoming click (the
+        // touchend) toggles the switch. vibrate covers Android.
         if (owed) {
           buzz();
-          clickHapticSwitch();
+          armHaptic(btn);
         }
         return;
       }
@@ -1641,8 +1723,12 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         const dx = e.clientX - sx, dy = e.clientY - sy;
         if (dx * dx + dy * dy > MOVE_CANCEL_PX * MOVE_CANCEL_PX) return;
       }
-      if (flagMode) onFlag(r, c, true);
-      else onReveal(r, c);
+      if (flagMode) {
+        if (onFlag(r, c)) {
+          buzz();
+          armHaptic(btn);
+        }
+      } else onReveal(r, c);
     }
 
     btn.addEventListener("pointerup", endPress);
@@ -1653,9 +1739,13 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     });
 
     btn.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      if (longFired) return; // long-press already placed the flag
-      onFlag(r, c, true);
+      // A touch long-press also fires contextmenu. preventDefault there can
+      // cancel the click that toggles the iOS switch, so only block the
+      // desktop menu.
+      const fromTouch = e.pointerType === "touch";
+      if (!fromTouch) e.preventDefault();
+      if (fromTouch || longFired) return;
+      if (onFlag(r, c)) buzz();
     });
   }
 
@@ -1675,6 +1765,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
         btn.dataset.r = String(r);
         btn.dataset.c = String(c);
         bindCell(btn, r, c);
+        mountHapticHit(btn, false);
         cells[r][c] = btn;
         frag.appendChild(btn);
       }
@@ -1801,6 +1892,10 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     renderStats();
   });
   hapticToggle.addEventListener("click", () => setHapticsOn(!hapticsOn()));
+  hapticTest.addEventListener("click", () => {
+    try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) { /* unsupported */ }
+  });
+  mountHapticHit(hapticTest, true);
 
   document.querySelectorAll("#diff-segs .diff").forEach((b) => {
     b.addEventListener("click", () => newGame(b.dataset.diff));

@@ -53,32 +53,38 @@ function test(name, fn) {
   }
 }
 
-test("page exposes a Stats button and the worker cache moved to v3", () => {
+test("page exposes a Stats button and the worker cache moved to v4", () => {
   assert.ok(html.includes('id="stats-btn"'));
   assert.ok(html.includes(">Stats<"));
-  assert.ok(sw.includes('const CACHE = "gray-mines-v3"'));
+  assert.ok(sw.includes('const CACHE = "gray-mines-v4"'));
   assert.ok(sw.includes("skipWaiting"));
   assert.ok(sw.includes("clients.claim"));
   assert.ok(html.includes('updateViaCache: "none"'));
 });
 
-test("flag haptics use the iOS switch click and can be turned off", () => {
-  assert.ok(html.includes('type="checkbox" switch'));
-  assert.ok(html.includes('id="haptic-label"'));
-  assert.ok(html.includes('id="haptic-toggle"'));
+test("iOS haptics use a real switch label under the finger, not label.click()", () => {
+  assert.ok(html.includes('id="haptic-test"'));
+  assert.ok(html.includes(">Test haptic<"));
+  assert.ok(html.includes('input.setAttribute("switch", "")'));
+  assert.ok(html.includes('className = "haptic-hit"'));
+  assert.ok(html.includes("opacity: 0"));
+  assert.ok(!html.includes("haptic-sink"));
+  assert.ok(!html.includes("clickHapticSwitch"));
+  assert.ok(!html.includes("label.click()"));
   assert.ok(html.includes("graymines-haptics"));
   assert.ok(html.includes("navigator.vibrate(15)"));
   assert.ok(html.includes("prefers-reduced-motion"));
   assert.ok(html.includes("flag-pop"));
-  assert.ok(html.includes("hapticDue"));
-  // Long-press draws the flag in the timer, then haptics run on pointerup.
-  const ui = html.slice(html.indexOf("function onFlag"));
-  const timerAt = ui.indexOf("onFlag(r, c, false)");
-  const upAt = ui.indexOf("if (owed)");
-  assert.ok(timerAt !== -1 && upAt !== -1 && timerAt < upAt);
-  assert.ok(ui.includes("clickHapticSwitch()"));
-  assert.ok(ui.slice(upAt, upAt + 180).includes("buzz()"));
-  assert.ok(ui.slice(upAt, upAt + 180).includes("clickHapticSwitch()"));
+  const ui = html.slice(html.indexOf("function mountHapticHit"));
+  assert.ok(ui.includes("armHaptic(btn)"));
+  assert.ok(ui.includes('label.dataset.arm === "1"'));
+  assert.ok(ui.includes("e.preventDefault()"));
+  const inputStart = html.indexOf(".haptic-hit input {");
+  const hitCss = html.slice(inputStart, html.indexOf("}", inputStart));
+  assert.ok(hitCss.includes("opacity: 0"));
+  assert.ok(!/display:\s*none/.test(hitCss));
+  assert.ok(!/visibility:\s*hidden/.test(hitCss));
+  assert.ok(!/pointer-events:\s*none/.test(hitCss));
 });
 
 test("migrates legacy best times without inventing games", () => {
