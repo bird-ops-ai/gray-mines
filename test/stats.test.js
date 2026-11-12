@@ -97,16 +97,16 @@ test("a loss reveals every mine and keeps correct flags", () => {
   assert.strictEqual(revealedMines, 2);
 });
 
-test("page exposes a Stats button and the worker cache moved to v7", () => {
+test("page exposes a Stats button and the worker cache moved to v8", () => {
   assert.ok(html.includes('id="stats-btn"'));
   assert.ok(html.includes(">Stats<"));
-  assert.ok(sw.includes('const CACHE = "gray-mines-v7"'));
+  assert.ok(sw.includes('const CACHE = "gray-mines-v8"'));
   assert.ok(sw.includes("skipWaiting"));
   assert.ok(sw.includes("clients.claim"));
   assert.ok(html.includes('updateViaCache: "none"'));
-  assert.ok(html.includes('setAttribute("class", "mine-svg")'));
-  assert.ok(html.includes('setAttribute("class", "spike")'));
-  assert.ok(!html.includes('className = "ore"'));
+  assert.ok(html.includes('className = "ore"'));
+  assert.ok(html.includes("radial-gradient(circle at 35% 30%, #f3d7a0, #c47a3a 55%, #3a2a1c 100%)"));
+  assert.ok(!html.includes("mine-svg"));
 });
 
 test("iOS haptics use a real switch label under the finger, not label.click()", () => {
