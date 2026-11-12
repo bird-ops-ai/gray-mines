@@ -469,22 +469,30 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
   pointer-events: none;
 }
 
-.ore {
-  width: 0.52em;
-  height: 0.52em;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #f3d7a0, #c47a3a 55%, #3a2a1c 100%);
-  box-shadow: 0 0 0 2px #2a2018, 0 0 10px rgba(224, 164, 90, 0.4);
+.mine-svg {
+  width: 88%;
+  height: 88%;
   display: block;
+  overflow: visible;
 }
+
+.mine-svg .spike {
+  stroke: #e7dcc8;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.mine-svg .body {
+  fill: #12100e;
+  stroke: #e7dcc8;
+  stroke-width: 0.45;
+}
+
+.mine-svg .shine { fill: #fffaf3; }
 
 .cell.boom {
   background: #8f3a2e;
   box-shadow: inset 0 0 0 2px var(--danger);
-}
-
-.cell.boom .ore {
-  box-shadow: 0 0 0 2px #3a1612, 0 0 10px rgba(224, 122, 95, 0.75);
 }
 
 .cell.mine.open { background: #241c16; }
@@ -1662,6 +1670,45 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     if (label) label.dataset.arm = "1";
   }
 
+  function mineGlyph() {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "mine-svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    const spikes = [
+      [8, 1.15, 8, 4.05],
+      [8, 11.95, 8, 14.85],
+      [1.15, 8, 4.05, 8],
+      [11.95, 8, 14.85, 8],
+      [3.15, 3.15, 5.15, 5.15],
+      [10.85, 10.85, 12.85, 12.85],
+      [12.85, 3.15, 10.85, 5.15],
+      [5.15, 10.85, 3.15, 12.85],
+    ];
+    for (let i = 0; i < spikes.length; i++) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("class", "spike");
+      line.setAttribute("x1", String(spikes[i][0]));
+      line.setAttribute("y1", String(spikes[i][1]));
+      line.setAttribute("x2", String(spikes[i][2]));
+      line.setAttribute("y2", String(spikes[i][3]));
+      svg.appendChild(line);
+    }
+    const body = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    body.setAttribute("class", "body");
+    body.setAttribute("cx", "8");
+    body.setAttribute("cy", "8");
+    body.setAttribute("r", "3.15");
+    const shine = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    shine.setAttribute("class", "shine");
+    shine.setAttribute("cx", "6.75");
+    shine.setAttribute("cy", "6.6");
+    shine.setAttribute("r", "1");
+    svg.appendChild(body);
+    svg.appendChild(shine);
+    return svg;
+  }
+
   function paintCell(r, c, fx) {
     const el = cells[r][c];
     const cell = game.board[r][c];
@@ -1689,10 +1736,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
       el.classList.add("open");
       if (cell.mine) {
         el.classList.add(cell.exploded ? "boom" : "mine");
-        const ore = document.createElement("span");
-        ore.className = "ore";
-        ore.setAttribute("aria-hidden", "true");
-        face.appendChild(ore);
+        face.appendChild(mineGlyph());
         el.setAttribute("aria-label", cell.exploded ? "tripped mine" : "mine");
       } else if (cell.adjacent > 0) {
         el.dataset.n = String(cell.adjacent);
