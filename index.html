@@ -509,6 +509,7 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
 
 .overlay[hidden] { display: none; }
 
+.overlay.win,
 .overlay.lose {
   inset: auto 0 0 0;
   background: none;
@@ -519,16 +520,20 @@ body:not(.haptics-on) .cell > .haptic-hit { pointer-events: none; }
   pointer-events: none;
 }
 
+.overlay.win .card,
 .overlay.lose .card {
   pointer-events: auto;
   width: min(440px, 100%);
   padding: 14px 14px 12px;
 }
 
+.overlay.win #overlay-title,
 .overlay.lose #overlay-title { font-size: 22px; }
 
+.overlay.win #overlay-sub,
 .overlay.lose #overlay-sub { margin: 4px 0 0; font-size: 14px; }
 
+.overlay.win #overlay-stats,
 .overlay.lose #overlay-stats { margin: 2px 0 12px; }
 
 .end-actions {
@@ -1746,8 +1751,8 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     overlayStats.classList.toggle("muted", !won);
     if (won) {
       overlayTitle.textContent = "Clear";
-      overlayBtn.textContent = "Play again";
-      overlayView.hidden = true;
+      overlayBtn.textContent = "New game";
+      overlayView.hidden = false;
       boardNew.hidden = true;
       overlay.classList.add("win");
       overlay.classList.remove("lose");
@@ -1764,7 +1769,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
 
   function viewBoard() {
     overlay.hidden = true;
-    if (game && game.status === "lost") boardNew.hidden = false;
+    if (game && (game.status === "won" || game.status === "lost")) boardNew.hidden = false;
   }
 
   function applyResult(res) {
@@ -2170,7 +2175,7 @@ body.flag-mode .cell:not(.open) { cursor: cell; }
     } else if (e.key === "r" || e.key === "R") {
       newGame();
     } else if (e.key === "Escape") {
-      if (!overlay.hidden && overlay.classList.contains("lose")) viewBoard();
+      if (!overlay.hidden && (overlay.classList.contains("win") || overlay.classList.contains("lose"))) viewBoard();
       else if (!overlay.hidden || !boardNew.hidden) newGame();
     }
   });

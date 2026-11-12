@@ -97,10 +97,29 @@ test("a loss reveals every mine and keeps correct flags", () => {
   assert.strictEqual(revealedMines, 2);
 });
 
-test("page exposes a Stats button and the worker cache moved to v8", () => {
+test("a win flags every remaining mine", () => {
+  const g = G.createGame({ id: "easy", rows: 2, cols: 2, mines: 1 }, { mines: [[0, 0]] });
+  G.toggleFlag(g, 0, 0);
+  G.reveal(g, 0, 1);
+  G.reveal(g, 1, 0);
+  const last = G.reveal(g, 1, 1);
+  assert.strictEqual(last.status, "won");
+  assert.strictEqual(g.board[0][0].mine, true);
+  assert.strictEqual(g.board[0][0].flagged, true);
+  assert.strictEqual(g.flagCount, 1);
+  const fresh = G.createGame({ id: "easy", rows: 2, cols: 2, mines: 1 }, { mines: [[1, 1]] });
+  G.reveal(fresh, 0, 0);
+  G.reveal(fresh, 0, 1);
+  G.reveal(fresh, 1, 0);
+  assert.strictEqual(fresh.status, "won");
+  assert.strictEqual(fresh.board[1][1].flagged, true);
+  assert.strictEqual(fresh.flagCount, 1);
+});
+
+test("page exposes a Stats button and the worker cache moved to v9", () => {
   assert.ok(html.includes('id="stats-btn"'));
   assert.ok(html.includes(">Stats<"));
-  assert.ok(sw.includes('const CACHE = "gray-mines-v8"'));
+  assert.ok(sw.includes('const CACHE = "gray-mines-v9"'));
   assert.ok(sw.includes("skipWaiting"));
   assert.ok(sw.includes("clients.claim"));
   assert.ok(html.includes('updateViaCache: "none"'));
